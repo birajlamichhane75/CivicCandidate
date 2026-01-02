@@ -16,10 +16,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('demo_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const initializeAuth = async () => {
+      const storedUser = localStorage.getItem('demo_user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        // Set initial state from local storage to prevent flicker
+        setUser(parsedUser);
+
+        // Fetch fresh data from DB to get latest verification status and constituency_id
+        try {
+           if (parsedUser.phone_number === 'admin') return; // Skip for static admin
+           
+           const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', parsedUser.id)
+            .single();
+          
+          if (data) {
+            setUser(data);
+            localStorage.setItem('demo_user', JSON.stringify(data));
+          }
+        } catch (err) {
+          console.error("Error refreshing user session:", err);
+        }
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (identifier: string, secret: string): Promise<boolean> => {

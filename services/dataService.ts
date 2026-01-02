@@ -8,31 +8,43 @@ export const getConstituencies = async (): Promise<Constituency[]> => {
     .from('constituencies')
     .select('*');
   
-  if (error) {
-    console.error('Error fetching constituencies:', error);
-    return MOCK_CONSTITUENCIES; // Fallback only if DB fails
+  if (error || !data || data.length === 0) {
+    // If DB is empty or fails, return the full static list from constants
+    return MOCK_CONSTITUENCIES; 
   }
-  return data || [];
+  return data;
 };
 
 export const getConstituencyById = async (id: string): Promise<Constituency | undefined> => {
+  // Try DB first
   const { data, error } = await supabase
     .from('constituencies')
     .select('*')
     .eq('id', id)
     .single();
     
-  if (error) return undefined;
-  return data;
+  if (data) return data;
+
+  // Fallback to static list
+  return MOCK_CONSTITUENCIES.find(c => c.id === id);
 };
 
 export const detectConstituency = async (province: string, district: string, municipality: string, ward: string): Promise<string> => {
-  // Logic remains client-side deterministic for this demo as we don't have a complex GIS backend
-  if (district === 'Kathmandu') return 'ktm-1';
-  if (district === 'Lalitpur') return 'lal-1';
-  if (district === 'Kaski') return 'kas-1';
-  if (district === 'Rupandehi') return 'rup-1';
-  return 'ktm-1';
+  // 1. Try to find a constituency in the static list that belongs to this district.
+  // We default to the FIRST constituency of the district to ensure a valid ID is returned.
+  // e.g. "Jhapa" -> "jhapa-1"
+  
+  const match = MOCK_CONSTITUENCIES.find(c => 
+    c.district.toLowerCase() === district.toLowerCase() && 
+    c.province.toLowerCase() === province.toLowerCase()
+  );
+
+  if (match) {
+      return match.id;
+  }
+  
+  // Final fallback
+  return 'kathmandu-1';
 };
 
 // --- Candidates ---
@@ -65,7 +77,6 @@ export const voteForCandidate = async (candidateId: string, voterPhone: string):
   if (voteError) throw voteError;
 
   // Increment candidate count (RPC or manual update)
-  // For simplicity doing manual fetch-update, but RPC `increment` is better for concurrency
   const { data: candidate } = await supabase.from('candidates').select('vote_count').eq('id', candidateId).single();
   
   if (candidate) {
@@ -201,20 +212,18 @@ export const processVerification = async (requestId: string, approved: boolean):
     .eq('id', requestId);
 
   // Update user status
-  await supabase
-    .from('users')
-    .update({ 
-        verification_status: newStatus, 
-        is_verified: approved,
-        // If approved, we confirm the constituency. In a real app, this comes from the detected ID.
-        // For now, we will just re-detect or trust the data service to have set it when requesting.
-        // The VerificationPage logic updates local state, but here we persist.
-        // We'll set a default constituency if approved for the demo based on mapping
-    })
-    .eq('id', request.user_id);
-    
+  const updatePayload: any = { 
+    verification_status: newStatus, 
+    is_verified: approved 
+  };
+
   if (approved) {
      const constituencyId = await detectConstituency(request.province, request.district, request.municipality, request.ward);
-     await supabase.from('users').update({ constituency_id: constituencyId }).eq('id', request.user_id);
+     updatePayload.constituency_id = constituencyId;
   }
+
+  await supabase
+    .from('users')
+    .update(updatePayload)
+    .eq('id', request.user_id);
 };

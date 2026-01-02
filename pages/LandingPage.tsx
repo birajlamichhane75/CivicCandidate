@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { detectConstituency, getConstituencies } from '../services/dataService';
 import { Constituency } from '../types';
-import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck } from 'react-icons/fa';
+import { PROVINCES } from '../constants';
+import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +12,13 @@ const LandingPage: React.FC = () => {
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [detectedId, setDetectedId] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  // Pagination & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  useEffect(() => {
     getConstituencies().then(setConstituencies);
   }, []);
 
@@ -19,6 +26,27 @@ const LandingPage: React.FC = () => {
     if (address.province && address.district && address.municipality && address.ward) {
       const id = await detectConstituency(address.province, address.district, address.municipality, address.ward);
       setDetectedId(id);
+    }
+  };
+
+  // Filter Logic
+  const filteredConstituencies = constituencies.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          c.district.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProvince = selectedProvince ? c.province === selectedProvince : true;
+    return matchesSearch && matchesProvince;
+  });
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredConstituencies.length / itemsPerPage);
+  const currentConstituencies = filteredConstituencies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -119,9 +147,38 @@ const LandingPage: React.FC = () => {
       {/* All Constituencies Grid */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Browse Constituencies</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Browse Constituencies</h2>
+            
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                {/* Search */}
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaSearch className="text-gray-400" />
+                    </div>
+                    <input 
+                        type="text"
+                        placeholder="Search district..."
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 w-full"
+                        value={searchTerm}
+                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                    />
+                </div>
+                
+                {/* Filter */}
+                <select 
+                    className="py-2 pl-3 pr-8 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    value={selectedProvince}
+                    onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
+                >
+                    <option value="">All Provinces</option>
+                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {constituencies.map((c) => (
+            {currentConstituencies.map((c) => (
               <div key={c.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-2">
@@ -135,7 +192,9 @@ const LandingPage: React.FC = () => {
                      {c.mp_image ? (
                         <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 rounded-full object-cover" />
                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200"></div>
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                             NA
+                        </div>
                      )}
                      <div className="text-xs">
                         <p className="text-gray-500">Representative</p>
@@ -150,6 +209,60 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
             ))}
+            
+            {currentConstituencies.length === 0 && (
+                <div className="col-span-full text-center py-12 text-gray-500">
+                    No constituencies found matching your filters.
+                </div>
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+              <div className="mt-12 flex justify-center items-center space-x-2">
+                  <button 
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      <FaChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      // Logic to show generic page numbers nicely
+                      let pageNum = i + 1;
+                      if (totalPages > 5 && currentPage > 3) {
+                          pageNum = currentPage - 3 + i;
+                          if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                      }
+                      
+                      return (
+                        <button
+                            key={pageNum}
+                            onClick={() => goToPage(pageNum)}
+                            className={`w-10 h-10 rounded-md font-medium text-sm transition ${
+                                currentPage === pageNum 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-white text-gray-700 border hover:bg-gray-50'
+                            }`}
+                        >
+                            {pageNum}
+                        </button>
+                      );
+                  })}
+
+                  <button 
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      <FaChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+              </div>
+          )}
+          
+          <div className="text-center text-xs text-gray-400 mt-4">
+              Showing {currentConstituencies.length} of {filteredConstituencies.length} (Total: {constituencies.length})
           </div>
         </div>
       </div>
