@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getCandidates, voteForCandidate, hasVoted } from '../services/dataService';
 import { useAuth } from '../services/authService';
 import { Candidate } from '../types';
-import { FaThumbsUp, FaUser, FaAward, FaScroll, FaCheck } from 'react-icons/fa';
+import { FaUserTie, FaCheckDouble, FaScroll, FaChevronLeft, FaUniversity } from 'react-icons/fa';
 
 const PreElectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,75 +32,74 @@ const PreElectionPage: React.FC = () => {
   };
 
   const handleVote = async (candidateId: string) => {
-    if (!user || !window.confirm('Are you sure you want to vote for this candidate? You cannot change your vote later.')) return;
+    if (!user || !window.confirm('Are you sure? This action is irreversible.\n(के तपाइँ निश्चित हुनुहुन्छ?)')) return;
     
     try {
         await voteForCandidate(candidateId, user.phone_number);
         setUserHasVoted(true);
-        // Refresh candidates to show new count
         if (id) {
             const cands = await getCandidates(id);
             setCandidates(cands);
         }
     } catch (error) {
-        alert('Voting failed: ' + error);
+        alert('Failed.');
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading Candidates...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500">डाटा लोड हुँदैछ... (Loading...)</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-start mb-8 border-b border-slate-200 pb-6">
         <div>
-             <Link to={`/constituency/${id}`} className="text-sm text-gray-500 hover:text-gray-700 mb-1 block">&larr; Back to Dashboard</Link>
-            <h1 className="text-3xl font-bold text-gray-900">Select Your Candidate</h1>
-            <p className="text-gray-600">Review proposals and background carefully before voting.</p>
+             <Link to={`/constituency/${id}`} className="text-sm text-slate-500 hover:text-slate-900 mb-2 flex items-center font-english"><FaChevronLeft className="mr-1 w-3 h-3"/> Dashboard</Link>
+            <h1 className="text-2xl font-bold text-slate-900">उम्मेदवार चयन (Select Candidate)</h1>
+            <p className="text-slate-500 text-sm mt-1">उम्मेदवारको योग्यता र प्रस्ताव हेरेर मात्र मतदान गर्नुहोस्। (Vote wisely based on merit.)</p>
         </div>
         {userHasVoted && (
-            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold flex items-center">
-                <FaCheck className="w-5 h-5 mr-2" /> You Have Voted
+            <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-2 rounded-sm text-sm font-bold flex items-center shadow-sm">
+                <FaCheckDouble className="w-4 h-4 mr-2" /> मतदान सम्पन्न (Voted)
             </div>
         )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Candidates List */}
-        <div className="flex-grow space-y-6">
+        <div className="flex-grow space-y-4">
             {candidates.length === 0 ? (
-                 <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <p className="text-gray-500 text-lg">No candidates have registered yet.</p>
-                    <Link to={`/constituency/${id}/apply`} className="mt-4 inline-block text-blue-600 hover:underline">Be the first candidate</Link>
+                 <div className="text-center py-16 bg-white border border-slate-200 rounded-sm">
+                    <p className="text-slate-500">कुनै उम्मेदवार छैनन्। (No candidates registered.)</p>
+                    <Link to={`/constituency/${id}/apply`} className="mt-4 inline-block text-slate-900 underline font-medium text-sm">Be the first candidate</Link>
                  </div>
             ) : (
                 candidates.map((candidate) => (
-                    <div key={candidate.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition">
+                    <div key={candidate.id} className="bg-white rounded-sm border border-slate-200 p-6 transition hover:border-slate-300">
                         <div className="flex flex-col md:flex-row gap-6">
-                            <div className="flex-shrink-0 flex flex-col items-center">
-                                <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 mb-2">
-                                    <FaUser className="h-12 w-12" />
+                            <div className="flex-shrink-0 flex flex-col items-center min-w-[100px] border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-4">
+                                <div className="h-16 w-16 rounded-sm bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                                    <FaUserTie className="h-8 w-8" />
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-gray-900">{candidate.vote_count}</div>
-                                    <div className="text-xs text-gray-500 uppercase">Votes</div>
+                                    <div className="text-xl font-bold text-slate-900 font-english">{candidate.vote_count}</div>
+                                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-english">Votes</div>
                                 </div>
                             </div>
                             <div className="flex-grow">
-                                <h3 className="text-xl font-bold text-gray-900">{candidate.name}</h3>
+                                <h3 className="text-lg font-bold text-slate-900">{candidate.name}</h3>
                                 <div className="flex flex-wrap gap-2 mt-2 mb-4">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <FaAward className="w-3 h-3 mr-1" /> {candidate.qualification}
+                                    <span className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                        <FaUniversity className="w-3 h-3 mr-1 text-slate-400" /> {candidate.qualification}
                                     </span>
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        Background: {candidate.background}
+                                    <span className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-white border border-slate-200 text-slate-600">
+                                        {candidate.background}
                                     </span>
                                 </div>
                                 
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <FaScroll className="w-4 h-4 mr-2" /> Key Proposals
+                                <div className="bg-slate-50 p-4 rounded-sm border border-slate-100">
+                                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center">
+                                        <FaScroll className="w-3 h-3 mr-2" /> मुख्य एजेन्डाहरु (Key Proposals)
                                     </h4>
-                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                    <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                                         {candidate.proposals.map((prop, idx) => (
                                             <li key={idx}>{prop}</li>
                                         ))}
@@ -111,14 +110,13 @@ const PreElectionPage: React.FC = () => {
                                 <button
                                     onClick={() => handleVote(candidate.id)}
                                     disabled={userHasVoted}
-                                    className={`px-6 py-3 rounded-lg font-bold flex items-center ${
+                                    className={`px-6 py-2 rounded-sm text-sm font-bold uppercase tracking-wide transition border ${
                                         userHasVoted 
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition'
+                                        ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' 
+                                        : 'bg-slate-900 text-white border-transparent hover:bg-slate-800 shadow-sm'
                                     }`}
                                 >
-                                    <FaThumbsUp className="w-5 h-5 mr-2" />
-                                    {userHasVoted ? 'Voted' : 'Vote'}
+                                    {userHasVoted ? 'भोट दिइसकियो (Done)' : 'भोट दिनुहोस् (Vote)'}
                                 </button>
                             </div>
                         </div>
@@ -127,32 +125,30 @@ const PreElectionPage: React.FC = () => {
             )}
         </div>
 
-        {/* Sidebar - Top Candidates */}
-        <div className="w-full lg:w-80 flex-shrink-0">
-             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
-                 <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Top Contenders</h3>
-                 <div className="space-y-4">
+        {/* Sidebar - Stats */}
+        <div className="w-full lg:w-72 flex-shrink-0">
+             <div className="bg-white rounded-sm border border-slate-200 p-5 sticky top-24">
+                 <h3 className="text-sm font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2 uppercase tracking-wide">अग्रस्थान (Leading)</h3>
+                 <div className="space-y-0 divide-y divide-slate-100">
                     {candidates.slice(0, 3).map((c, index) => (
-                        <div key={c.id} className="flex items-center justify-between">
+                        <div key={c.id} className="flex items-center justify-between py-3">
                             <div className="flex items-center">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${index === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+                                <span className={`w-5 h-5 rounded-sm flex items-center justify-center text-[10px] font-bold mr-3 ${index === 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>
                                     {index + 1}
                                 </span>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                                    <p className="text-xs text-gray-500">{c.qualification}</p>
+                                    <p className="text-sm font-medium text-slate-800">{c.name}</p>
                                 </div>
                             </div>
-                            <span className="text-sm font-bold text-blue-600">{c.vote_count}</span>
+                            <span className="text-sm font-bold text-slate-900 font-english">{c.vote_count}</span>
                         </div>
                     ))}
-                    {candidates.length === 0 && <p className="text-sm text-gray-400">No data yet.</p>}
+                    {candidates.length === 0 && <p className="text-xs text-slate-400 py-2">डाटा उपलब्ध छैन (No Data)</p>}
                  </div>
 
-                 <div className="mt-8 pt-6 border-t border-gray-100">
-                     <p className="text-sm text-gray-600 mb-4">Think you can do better?</p>
-                     <Link to={`/constituency/${id}/apply`} className="block w-full text-center bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800">
-                        Become a Candidate
+                 <div className="mt-6 pt-4 border-t border-slate-100">
+                     <Link to={`/constituency/${id}/apply`} className="block w-full text-center bg-white border border-slate-300 text-slate-700 py-2 rounded-sm text-xs font-bold uppercase hover:bg-slate-50">
+                        उम्मेदवारी दर्ता (Register Candidate)
                      </Link>
                  </div>
              </div>

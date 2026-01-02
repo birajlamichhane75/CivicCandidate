@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getIssues, reportIssue, upvoteIssue, getConstituencyById } from '../services/dataService';
 import { useAuth } from '../services/authService';
 import { Issue, Constituency } from '../types';
-import { FaExclamationTriangle, FaChevronUp, FaCheckCircle, FaClock } from 'react-icons/fa';
+import { FaExclamationTriangle, FaChevronUp, FaCheckCircle, FaClock, FaChevronLeft, FaPen } from 'react-icons/fa';
 
 const PostElectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,16 +32,15 @@ const PostElectionPage: React.FC = () => {
       if (!user) return;
       try {
           await upvoteIssue(issueId, user.phone_number);
-          loadData(); // Reload to show updated count
+          loadData();
       } catch (e) {
-          alert(e);
+          alert("Error: " + e);
       }
   };
 
   const handleReportIssue = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!id || !user) return;
-
       await reportIssue({
           constituency_id: id,
           title: newIssueTitle,
@@ -49,60 +48,68 @@ const PostElectionPage: React.FC = () => {
           status: 'pending',
           created_by: user.phone_number
       });
-
       setNewIssueTitle('');
       setNewIssueDesc('');
       setShowIssueForm(false);
       loadData();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
       switch(status) {
-          case 'resolved': return 'bg-green-100 text-green-800';
-          case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-          default: return 'bg-gray-100 text-gray-800';
+          case 'resolved': 
+            return <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">समाधान (Resolved)</span>;
+          case 'in_progress': 
+            return <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase bg-amber-100 text-amber-800 border border-amber-200">प्रक्रियामा (In Progress)</span>;
+          default: 
+            return <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">दर्ता (Pending)</span>;
       }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link to={`/constituency/${id}`} className="text-sm text-gray-500 hover:text-gray-700 mb-4 block">&larr; Back to Dashboard</Link>
+        <Link to={`/constituency/${id}`} className="text-sm text-slate-500 hover:text-slate-900 mb-4 block flex items-center font-english"><FaChevronLeft className="mr-1 w-3 h-3"/> Back to Dashboard</Link>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content: Issues */}
             <div className="lg:col-span-2 space-y-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-900">Local Issues</h1>
+                <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+                    <h1 className="text-2xl font-bold text-slate-900">नागरिक गुनासो (Local Issues)</h1>
                     <button 
                         onClick={() => setShowIssueForm(!showIssueForm)}
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700"
+                        className="bg-slate-900 text-white px-4 py-2 rounded-sm text-sm font-medium hover:bg-slate-800 transition flex items-center"
                     >
-                        Report an Issue
+                        <FaPen className="mr-2 w-3 h-3" /> दर्ता गर्नुहोस् (Report)
                     </button>
                 </div>
 
                 {showIssueForm && (
-                    <div className="bg-white p-6 rounded-lg shadow-md border border-red-100 mb-6 animate-fade-in">
-                        <h3 className="text-lg font-semibold mb-4">Report New Issue</h3>
-                        <form onSubmit={handleReportIssue}>
-                            <input 
-                                className="w-full border p-2 rounded mb-3" 
-                                placeholder="Issue Title" 
-                                value={newIssueTitle}
-                                onChange={e => setNewIssueTitle(e.target.value)}
-                                required 
-                            />
-                            <textarea 
-                                className="w-full border p-2 rounded mb-3" 
-                                placeholder="Describe the problem..." 
-                                rows={3}
-                                value={newIssueDesc}
-                                onChange={e => setNewIssueDesc(e.target.value)}
-                                required 
-                            />
-                            <div className="flex justify-end space-x-2">
-                                <button type="button" onClick={() => setShowIssueForm(false)} className="px-4 py-2 text-gray-600">Cancel</button>
-                                <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded">Submit Report</button>
+                    <div className="bg-slate-50 p-6 rounded-sm border border-slate-200 mb-6">
+                        <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">नयाँ समस्या दर्ता फारम (New Issue Form)</h3>
+                        <form onSubmit={handleReportIssue} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 mb-1">विषय (Title)</label>
+                                <input 
+                                    className="w-full border border-slate-300 p-2 rounded-sm focus:ring-1 focus:ring-slate-900 text-sm" 
+                                    placeholder="Eg. Road Damage in Ward 4" 
+                                    value={newIssueTitle}
+                                    onChange={e => setNewIssueTitle(e.target.value)}
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 mb-1">विवरण (Description)</label>
+                                <textarea 
+                                    className="w-full border border-slate-300 p-2 rounded-sm focus:ring-1 focus:ring-slate-900 text-sm" 
+                                    placeholder="Details..." 
+                                    rows={3}
+                                    value={newIssueDesc}
+                                    onChange={e => setNewIssueDesc(e.target.value)}
+                                    required 
+                                />
+                            </div>
+                            <div className="flex justify-end space-x-2 pt-2">
+                                <button type="button" onClick={() => setShowIssueForm(false)} className="px-4 py-2 text-slate-600 text-sm hover:text-slate-900">रद्द (Cancel)</button>
+                                <button type="submit" className="bg-slate-900 text-white px-4 py-2 rounded-sm text-sm font-medium">पेश गर्नुहोस् (Submit)</button>
                             </div>
                         </form>
                     </div>
@@ -110,74 +117,68 @@ const PostElectionPage: React.FC = () => {
 
                 <div className="space-y-4">
                     {issues.map(issue => (
-                        <div key={issue.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex gap-4">
-                            <div className="flex flex-col items-center justify-center space-y-1 min-w-[60px]">
+                        <div key={issue.id} className="bg-white p-5 rounded-sm shadow-sm border border-slate-200 flex gap-5 hover:border-slate-300 transition">
+                            <div className="flex flex-col items-center justify-start min-w-[50px] pt-1">
                                 <button 
                                     onClick={() => handleUpvote(issue.id)}
-                                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-orange-500 transition"
+                                    className="p-1 rounded-sm hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition mb-1"
+                                    title="Upvote Priority"
                                 >
-                                    <FaChevronUp className="w-8 h-8" />
+                                    <FaChevronUp className="w-6 h-6" />
                                 </button>
-                                <span className="font-bold text-lg text-gray-900">{issue.upvotes}</span>
+                                <span className="font-bold text-lg text-slate-800 font-english">{issue.upvotes}</span>
                             </div>
                             <div className="flex-grow">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="text-lg font-bold text-gray-900">{issue.title}</h3>
-                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${getStatusColor(issue.status)}`}>
-                                        {issue.status.replace('_', ' ')}
-                                    </span>
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="text-base font-bold text-slate-900">{issue.title}</h3>
+                                    {getStatusBadge(issue.status)}
                                 </div>
-                                <p className="text-gray-600 mt-2">{issue.description}</p>
-                                <div className="mt-4 flex items-center text-xs text-gray-500 space-x-4">
-                                    <span>Reported: {issue.created_at}</span>
-                                    <span>By: {issue.created_by.substring(0, 4)}***</span>
+                                <p className="text-slate-600 text-sm mb-3 leading-relaxed">{issue.description}</p>
+                                <div className="flex items-center text-[10px] text-slate-400 font-english uppercase tracking-wider space-x-4 border-t border-slate-50 pt-3">
+                                    <span>Date: {new Date(issue.created_at).toLocaleDateString()}</span>
+                                    <span>User: {issue.created_by.substring(0, 4)}***</span>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {issues.length === 0 && <p className="text-center text-gray-500 py-8">No issues reported yet.</p>}
+                    {issues.length === 0 && <p className="text-center text-slate-500 py-8 text-sm">कुनै गुनासो छैन (No issues reported yet).</p>}
                 </div>
             </div>
 
             {/* Sidebar: MP Accountability */}
             <div className="space-y-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Representative</h3>
+                <div className="bg-white p-6 rounded-sm shadow-sm border border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide border-b border-slate-100 pb-2">जनप्रतिनिधि (Representative)</h3>
                     <div className="flex items-center space-x-4 mb-4">
                         {constituency?.mp_image ? (
-                             <img src={constituency.mp_image} className="w-16 h-16 rounded-full object-cover" alt="MP" />
+                             <img src={constituency.mp_image} className="w-14 h-14 rounded-sm object-cover grayscale" alt="MP" />
                         ) : (
-                             <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                             <div className="w-14 h-14 bg-slate-200 rounded-sm"></div>
                         )}
                         <div>
-                            <p className="font-bold text-lg">{constituency?.mp_name || "Vacant"}</p>
-                            <p className="text-sm text-gray-500">{constituency?.name}</p>
+                            <p className="font-bold text-base text-slate-900">{constituency?.mp_name || "Vacant"}</p>
+                            <p className="text-xs text-slate-500">{constituency?.name}</p>
                         </div>
-                    </div>
-                    <div className="border-t pt-4 space-y-3">
-                         <h4 className="font-semibold text-sm text-gray-700">Monthly Report (Oct)</h4>
-                         <p className="text-xs text-gray-600 italic">"We have successfully allocated budget for the Baneshwor road repair..."</p>
-                         <button className="text-blue-600 text-xs font-medium hover:underline">Read Full Report</button>
                     </div>
                 </div>
 
-                <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                    <h3 className="text-md font-bold text-blue-900 mb-3">Progress Tracker</h3>
+                <div className="bg-slate-50 p-6 rounded-sm border border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wide">प्रगति विवरण (Progress Tracker)</h3>
                     <div className="space-y-4">
                         <div className="flex items-center text-sm">
-                            <FaCheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                            <span className="flex-1">School Renovation</span>
-                            <span className="font-bold text-green-700">Done</span>
+                            <FaCheckCircle className="w-4 h-4 text-emerald-600 mr-2" />
+                            <span className="flex-1 text-slate-700">School Renovation</span>
+                            <span className="text-xs font-bold text-emerald-700 uppercase">सम्पन्न (Done)</span>
                         </div>
                         <div className="flex items-center text-sm">
-                            <FaClock className="w-4 h-4 text-yellow-500 mr-2" />
-                            <span className="flex-1">Water Supply Line</span>
-                            <span className="font-bold text-yellow-700">60%</span>
+                            <FaClock className="w-4 h-4 text-amber-500 mr-2" />
+                            <span className="flex-1 text-slate-700">Water Supply Line</span>
+                            <span className="text-xs font-bold text-amber-700 font-english">60%</span>
                         </div>
                          <div className="flex items-center text-sm">
-                            <FaExclamationTriangle className="w-4 h-4 text-gray-400 mr-2" />
-                            <span className="flex-1 text-gray-500">Park Project</span>
-                            <span className="text-gray-500">Planned</span>
+                            <FaExclamationTriangle className="w-4 h-4 text-slate-300 mr-2" />
+                            <span className="flex-1 text-slate-400">Park Project</span>
+                            <span className="text-xs text-slate-400 uppercase">योजना (Planned)</span>
                         </div>
                     </div>
                 </div>

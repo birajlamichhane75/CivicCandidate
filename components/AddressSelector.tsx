@@ -23,7 +23,6 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
 
   useEffect(() => {
      if (district) {
-         // Reset municipality if not valid for district (using simplified mock check)
          if (municipality && !(MUNICIPALITIES[district] || MUNICIPALITIES['Default']).includes(municipality)) {
              setMunicipality('');
              setWard('');
@@ -42,17 +41,20 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
   const availableDistricts = province ? DISTRICTS[province] || [] : [];
   const availableMunicipalities = district ? (MUNICIPALITIES[district] || MUNICIPALITIES['Default']) : [];
 
+  const selectClass = "w-full bg-white border border-slate-300 rounded-sm p-3 text-slate-800 focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-english disabled:bg-slate-100 disabled:text-slate-400";
+  const labelClass = "block text-sm font-semibold text-slate-700 mb-1";
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+        <label className={labelClass}>प्रदेश (Province)</label>
         <select
           value={province}
           onChange={(e) => setProvince(e.target.value)}
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+          className={selectClass}
           required
         >
-          <option value="">Select Province</option>
+          <option value="">छान्नुहोस् (Select)</option>
           {PROVINCES.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
@@ -60,15 +62,15 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+        <label className={labelClass}>जिल्ला (District)</label>
         <select
           value={district}
           onChange={(e) => setDistrict(e.target.value)}
           disabled={!province}
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          className={selectClass}
           required
         >
-          <option value="">Select District</option>
+          <option value="">छान्नुहोस् (Select)</option>
           {availableDistricts.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
@@ -76,15 +78,15 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Municipality</label>
+        <label className={labelClass}>नगरपालिका / गाउँपालिका (Municipality)</label>
         <select
           value={municipality}
           onChange={(e) => setMunicipality(e.target.value)}
           disabled={!district}
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          className={selectClass}
           required
         >
-          <option value="">Select Municipality</option>
+          <option value="">छान्नुहोस् (Select)</option>
           {availableMunicipalities.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
@@ -92,15 +94,15 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ward No.</label>
+        <label className={labelClass}>वडा नं. (Ward No.)</label>
         <select
           value={ward}
           onChange={(e) => setWard(e.target.value)}
           disabled={!municipality}
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          className={selectClass}
           required
         >
-          <option value="">Select Ward</option>
+          <option value="">छान्नुहोस् (Select)</option>
           {[...Array(32)].map((_, i) => (
             <option key={i + 1} value={(i + 1).toString()}>{i + 1}</option>
           ))}

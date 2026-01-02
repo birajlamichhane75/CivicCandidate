@@ -4,7 +4,7 @@ import AddressSelector from '../components/AddressSelector';
 import { detectConstituency, getConstituencies } from '../services/dataService';
 import { Constituency } from '../types';
 import { PROVINCES } from '../constants';
-import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding } from 'react-icons/fa';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +29,6 @@ const LandingPage: React.FC = () => {
     }
   };
 
-  // Filter Logic
   const filteredConstituencies = constituencies.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           c.district.toLowerCase().includes(searchTerm.toLowerCase());
@@ -37,7 +36,6 @@ const LandingPage: React.FC = () => {
     return matchesSearch && matchesProvince;
   });
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredConstituencies.length / itemsPerPage);
   const currentConstituencies = filteredConstituencies.slice(
     (currentPage - 1) * itemsPerPage,
@@ -51,92 +49,98 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-white">
-      {/* Hero Section */}
-      <div className="relative bg-blue-900 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1541872703-74c5963631df?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-            Democracy Starts With <span className="text-yellow-400">You</span>
+    <div className="bg-slate-50">
+      {/* Hero Section - Official Tone */}
+      <div className="bg-slate-900 text-white relative border-b border-slate-700">
+        <div className="absolute inset-0 bg-slate-800 opacity-50 pattern-grid-lg"></div>
+        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 text-center">
+          <div className="inline-block border border-slate-500 rounded-full px-4 py-1 mb-6 bg-slate-800/50 backdrop-blur-sm">
+             <span className="text-sm font-medium tracking-wide">नागरिक सहभागिता (Civic Participation)</span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
+            लोकतान्त्रिक प्रक्रियामा <br/>
+            <span className="text-slate-200">तपाईंको सहभागिता</span>
           </h1>
-          <p className="text-xl md:text-2xl max-w-3xl mb-10 text-blue-100">
-            Select your candidates directly. Hold representatives accountable. 
-            Participate in the constituency that matters to you.
+          <p className="text-lg md:text-xl text-slate-400 font-english mb-8 max-w-2xl mx-auto">
+            (Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.)
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-             <a href="#find-constituency" className="bg-yellow-500 text-blue-900 px-8 py-3 rounded-full font-bold text-lg hover:bg-yellow-400 transition transform hover:scale-105 shadow-lg">
-                Find My Constituency
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+             <a href="#find-constituency" className="bg-white text-slate-900 px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-100 transition shadow-md border border-transparent">
+                मेरो क्षेत्र खोज्नुहोस् (Find My Area)
              </a>
-             <Link to="/verify" className="bg-transparent border-2 border-white px-8 py-3 rounded-full font-bold text-lg hover:bg-white hover:text-blue-900 transition">
-                Verify & Participate
+             <Link to="/verify" className="bg-transparent border border-slate-400 text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-800 transition">
+                प्रमाणीकरण (Verify ID)
              </Link>
           </div>
         </div>
       </div>
 
-      {/* How it Works */}
-      <div className="py-16 bg-gray-50">
+      {/* Process Steps - Institutional Cards */}
+      <div className="py-16 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">How Nagarik Aawaz Works</h2>
-            <p className="mt-4 text-gray-600">A simple, transparent process to reclaim local democracy.</p>
+            <h2 className="text-2xl font-bold text-slate-900">प्रक्रिया (Process)</h2>
+            <p className="mt-2 text-slate-500 font-english">How Nagarik Aawaz works</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
-                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FaClipboardCheck className="w-8 h-8" />
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
+                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+                    <FaClipboardCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">1. Verify Identity</h3>
-                <p className="text-gray-600">Upload your ID and confirm address to ensure 1 citizen = 1 constituency.</p>
+                <h3 className="text-lg font-bold mb-2">१. पहिचान प्रमाणीकरण (Verify)</h3>
+                <p className="text-slate-600 text-sm">आफ्नो परिचय पत्र अपलोड गर्नुहोस् र आफ्नो निर्वाचन क्षेत्र यकिन गर्नुहोस्।</p>
+                <p className="text-slate-400 text-xs mt-2 font-english">(Upload ID and confirm your constituency.)</p>
             </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
-                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FaVoteYea className="w-8 h-8" />
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
+                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+                    <FaVoteYea className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">2. Select Candidate</h3>
-                <p className="text-gray-600">Pre-election, vote for the most capable candidate to represent your area.</p>
+                <h3 className="text-lg font-bold mb-2">२. उम्मेदवार चयन (Vote)</h3>
+                <p className="text-slate-600 text-sm">निर्वाचन पूर्व, योग्य उम्मेदवारको प्रस्ताव हेर्नुहोस् र मतदान गर्नुहोस्।</p>
+                <p className="text-slate-400 text-xs mt-2 font-english">(Review proposals and vote for candidates.)</p>
             </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
-                <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FaUsers className="w-8 h-8" />
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
+                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+                    <FaUsers className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">3. Ensure Accountability</h3>
-                <p className="text-gray-600">Post-election, raise issues, upvote problems, and track MP progress.</p>
+                <h3 className="text-lg font-bold mb-2">३. जवाफदेहिता (Accountability)</h3>
+                <p className="text-slate-600 text-sm">निर्वाचन पश्चात, समस्या दर्ता गर्नुहोस् र प्रतिनिधिको कामको निगरानी गर्नुहोस्।</p>
+                <p className="text-slate-400 text-xs mt-2 font-english">(Report issues and track representative progress.)</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Constituency Finder */}
-      <div id="find-constituency" className="py-16 bg-white border-t border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white border-2 border-blue-100 p-8 rounded-2xl shadow-xl">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">
-              <FaSearch className="w-6 h-6 mr-2 text-blue-600" />
-              Find Your Constituency
+      {/* Finder Tool */}
+      <div id="find-constituency" className="py-16 bg-slate-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white border border-slate-300 p-8 shadow-sm rounded-sm">
+            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center border-b border-slate-100 pb-4">
+              <FaSearch className="w-5 h-5 mr-3 text-slate-500" />
+              आफ्नो निर्वाचन क्षेत्र पत्ता लगाउनुहोस् (Identify Constituency)
             </h2>
             <AddressSelector onAddressChange={setAddress} />
-            <div className="mt-6 text-center">
+            <div className="mt-8 pt-4 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={handleFindConstituency}
-                className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto bg-slate-900 text-white px-8 py-3 rounded-sm font-semibold hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 disabled={!address.ward}
               >
-                Identify Constituency
+                खोज्नुहोस् (Search)
               </button>
             </div>
 
             {detectedId && (
-              <div className="mt-8 p-6 bg-green-50 border border-green-200 rounded-lg text-center animate-fade-in">
-                <p className="text-green-800 font-medium mb-2">Your Constituency is:</p>
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              <div className="mt-6 p-6 bg-emerald-50 border border-emerald-200 text-center">
+                <p className="text-emerald-800 font-medium mb-2 text-sm">तपाईंको निर्वाचन क्षेत्र (Your Constituency)</p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">
                   {constituencies.find(c => c.id === detectedId)?.name || detectedId}
                 </h3>
                 <button 
                    onClick={() => navigate(`/constituency/${detectedId}`)}
-                   className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700"
+                   className="inline-block bg-emerald-700 text-white px-6 py-2 rounded-sm font-medium hover:bg-emerald-800 text-sm transition"
                 >
-                  Go to Constituency Dashboard
+                  ड्यासबोर्डमा जानुहोस् (Go to Dashboard)
                 </button>
               </div>
             )}
@@ -144,92 +148,81 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* All Constituencies Grid */}
-      <div className="py-16 bg-gray-50">
+      {/* Directory Grid */}
+      <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Browse Constituencies</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-200 pb-4">
+            <h2 className="text-xl font-bold text-slate-900">निर्वाचन क्षेत्रहरू (Constituencies Directory)</h2>
             
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                {/* Search */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaSearch className="text-gray-400" />
+                        <FaSearch className="text-slate-400 w-3 h-3" />
                     </div>
                     <input 
                         type="text"
                         placeholder="Search district..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 w-full"
+                        className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 w-full text-sm font-english"
                         value={searchTerm}
                         onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     />
                 </div>
                 
-                {/* Filter */}
                 <select 
-                    className="py-2 pl-3 pr-8 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 text-sm font-english bg-white"
                     value={selectedProvince}
                     onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
                 >
-                    <option value="">All Provinces</option>
+                    <option value="">सबै प्रदेश (All Provinces)</option>
                     {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {currentConstituencies.map((c) => (
-              <div key={c.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-semibold uppercase text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                      {c.province.split(' ')[0]}
-                    </span>
-                    <span className="text-xs text-gray-500">{c.district}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{c.name}</h3>
-                  <div className="flex items-center space-x-2 mt-4">
-                     {c.mp_image ? (
-                        <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 rounded-full object-cover" />
-                     ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                             NA
-                        </div>
-                     )}
-                     <div className="text-xs">
-                        <p className="text-gray-500">Representative</p>
-                        <p className="font-medium truncate max-w-[120px]">{c.mp_name || "Vacant"}</p>
-                     </div>
-                  </div>
+              <div key={c.id} className="bg-white border border-slate-200 hover:border-slate-400 transition p-5 group">
+                <div className="mb-3">
+                  <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                    {c.province.replace('Province', '')}
+                  </span>
+                  <div className="text-xs text-slate-400 font-english">{c.district}</div>
                 </div>
-                <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
-                  <Link to={`/constituency/${c.id}`} className="text-sm text-blue-600 font-medium hover:text-blue-800">
-                    View Constituency &rarr;
+                <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-blue-900 transition">{c.name}</h3>
+                <div className="flex items-center space-x-3 pt-3 border-t border-slate-100">
+                   {c.mp_image ? (
+                      <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 grayscale group-hover:grayscale-0 transition object-cover rounded-sm" />
+                   ) : (
+                      <div className="w-8 h-8 bg-slate-100 flex items-center justify-center text-slate-400 rounded-sm">
+                           <FaBuilding className="w-3 h-3" />
+                      </div>
+                   )}
+                   <div className="text-xs">
+                      <p className="text-slate-500">प्रतिनिधि (Rep)</p>
+                      <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || "पद रिक्त (Vacant)"}</p>
+                   </div>
+                </div>
+                <div className="mt-4">
+                  <Link to={`/constituency/${c.id}`} className="text-xs font-bold text-slate-900 hover:underline uppercase tracking-wide">
+                    विवरण हेर्नुहोस् (View) &rarr;
                   </Link>
                 </div>
               </div>
             ))}
-            
-            {currentConstituencies.length === 0 && (
-                <div className="col-span-full text-center py-12 text-gray-500">
-                    No constituencies found matching your filters.
-                </div>
-            )}
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
-              <div className="mt-12 flex justify-center items-center space-x-2">
+              <div className="mt-12 flex justify-center items-center space-x-1">
                   <button 
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                   >
-                      <FaChevronLeft className="w-4 h-4 text-gray-600" />
+                      <FaChevronLeft className="w-3 h-3" />
                   </button>
                   
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      // Logic to show generic page numbers nicely
                       let pageNum = i + 1;
                       if (totalPages > 5 && currentPage > 3) {
                           pageNum = currentPage - 3 + i;
@@ -240,10 +233,10 @@ const LandingPage: React.FC = () => {
                         <button
                             key={pageNum}
                             onClick={() => goToPage(pageNum)}
-                            className={`w-10 h-10 rounded-md font-medium text-sm transition ${
+                            className={`w-8 h-8 text-sm font-medium transition rounded-sm ${
                                 currentPage === pageNum 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-white text-gray-700 border hover:bg-gray-50'
+                                ? 'bg-slate-900 text-white border border-slate-900' 
+                                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                             }`}
                         >
                             {pageNum}
@@ -254,16 +247,12 @@ const LandingPage: React.FC = () => {
                   <button 
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                   >
-                      <FaChevronRight className="w-4 h-4 text-gray-600" />
+                      <FaChevronRight className="w-3 h-3" />
                   </button>
               </div>
           )}
-          
-          <div className="text-center text-xs text-gray-400 mt-4">
-              Showing {currentConstituencies.length} of {filteredConstituencies.length} (Total: {constituencies.length})
-          </div>
         </div>
       </div>
     </div>
