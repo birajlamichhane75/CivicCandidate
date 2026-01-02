@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../services/authService';
-import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const VerificationStatusPage: React.FC = () => {
@@ -14,7 +14,7 @@ const VerificationStatusPage: React.FC = () => {
         {user.verification_status === 'pending' && (
             <>
                 <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-yellow-100 mb-6 animate-pulse">
-                    <Clock className="h-10 w-10 text-yellow-600" />
+                    <FaClock className="h-10 w-10 text-yellow-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Verification Pending</h2>
                 <p className="text-gray-600 mb-6">
@@ -30,7 +30,7 @@ const VerificationStatusPage: React.FC = () => {
         {user.verification_status === 'rejected' && (
             <>
                 <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6">
-                    <XCircle className="h-10 w-10 text-red-600" />
+                    <FaTimesCircle className="h-10 w-10 text-red-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h2>
                 <p className="text-gray-600 mb-6">
@@ -45,7 +45,7 @@ const VerificationStatusPage: React.FC = () => {
         {user.verification_status === 'approved' && (
             <>
                  <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
-                    <CheckCircle className="h-10 w-10 text-green-600" />
+                    <FaCheckCircle className="h-10 w-10 text-green-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">You are Verified!</h2>
                 <p className="text-gray-600 mb-6">

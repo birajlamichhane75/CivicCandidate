@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { registerCandidate } from '../services/dataService';
-import { Plus, Trash2 } from 'lucide-react';
+import { FaPlus, FaTrash } from 'react-icons/fa';
 
 const CandidateApplyPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,7 +112,7 @@ const CandidateApplyPage: React.FC = () => {
                              />
                              {proposals.length > 5 && (
                                  <button type="button" onClick={() => removeProposal(index)} className="text-red-500 hover:text-red-700">
-                                     <Trash2 className="w-5 h-5" />
+                                     <FaTrash className="w-5 h-5" />
                                  </button>
                              )}
                          </div>
@@ -123,7 +123,7 @@ const CandidateApplyPage: React.FC = () => {
                     onClick={addProposal} 
                     className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center"
                  >
-                     <Plus className="w-4 h-4 mr-1" /> Add Proposal
+                     <FaPlus className="w-4 h-4 mr-1" /> Add Proposal
                  </button>
             </div>
 

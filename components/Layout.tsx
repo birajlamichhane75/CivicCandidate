@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
-import { Menu, X, User as UserIcon, LogOut, ShieldCheck, MapPin } from 'lucide-react';
+import { FaBars, FaTimes, FaUser, FaSignOutAlt, FaUserShield, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -23,7 +23,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <ShieldCheck className="h-8 w-8 text-blue-300" />
+                <FaUserShield className="h-8 w-8 text-blue-300" />
                 <span className="font-bold text-xl tracking-tight">Nagarik Aawaz</span>
               </Link>
             </div>
@@ -43,7 +43,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   )}
                   {user.is_verified && user.constituency_id && (
                     <Link to={`/constituency/${user.constituency_id}`} className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
+                      <FaMapMarkerAlt className="h-4 w-4 mr-1" />
                       My Constituency
                     </Link>
                   )}
@@ -58,7 +58,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <span className="text-xs font-semibold capitalize">{user.role}</span>
                     </div>
                     <button onClick={handleLogout} className="p-2 rounded-full hover:bg-blue-800" title="Logout">
-                      <LogOut className="h-5 w-5" />
+                      <FaSignOutAlt className="h-5 w-5" />
                     </button>
                   </div>
                 </>
@@ -75,7 +75,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-blue-200 hover:text-white hover:bg-blue-700 focus:outline-none"
               >
-                {isMenuOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
+                {isMenuOpen ? <FaTimes className="block h-6 w-6" /> : <FaBars className="block h-6 w-6" />}
               </button>
             </div>
           </div>
@@ -112,7 +112,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-white text-lg font-bold mb-4 flex items-center">
-              <ShieldCheck className="h-5 w-5 mr-2" /> Nagarik Aawaz
+              <FaUserShield className="h-5 w-5 mr-2" /> Nagarik Aawaz
             </h3>
             <p className="text-sm">Empowering citizens to participate in local democracy, select candidates, and hold representatives accountable.</p>
           </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getConstituencyById } from '../services/dataService';
 import { Constituency } from '../types';
-import { Vote, Users, FileText, ChevronRight } from 'lucide-react';
+import { FaVoteYea, FaUsers, FaFileAlt, FaChevronRight } from 'react-icons/fa';
 
 const ConstituencyDashboard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +42,7 @@ const ConstituencyDashboard: React.FC = () => {
                     <h2 className="text-xl font-bold text-blue-900">Pre-Election Phase</h2>
                     <p className="text-sm text-blue-700">Select the best candidate</p>
                 </div>
-                <Vote className="h-8 w-8 text-blue-500" />
+                <FaVoteYea className="h-8 w-8 text-blue-500" />
             </div>
             <div className="p-6">
                 <p className="text-gray-600 mb-6">
@@ -66,7 +66,7 @@ const ConstituencyDashboard: React.FC = () => {
                     <h2 className="text-xl font-bold text-green-900">Post-Election Phase</h2>
                     <p className="text-sm text-green-700">Accountability & Issues</p>
                 </div>
-                <Users className="h-8 w-8 text-green-500" />
+                <FaUsers className="h-8 w-8 text-green-500" />
             </div>
             <div className="p-6">
                  <p className="text-gray-600 mb-6">
@@ -85,7 +85,7 @@ const ConstituencyDashboard: React.FC = () => {
          <div className="bg-white rounded-lg shadow p-6">
              <div className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
                 <div className="bg-yellow-100 p-2 rounded-full">
-                    <FileText className="h-4 w-4 text-yellow-600" />
+                    <FaFileAlt className="h-4 w-4 text-yellow-600" />
                 </div>
                 <div>
                     <p className="text-sm font-medium text-gray-900">New Issue Reported</p>

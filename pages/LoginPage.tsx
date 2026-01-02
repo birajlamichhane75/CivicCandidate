@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
-import { Phone, Lock, ArrowRight, Info } from 'lucide-react';
+import { FaPhone, FaLock, FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
               <label htmlFor="phone" className="sr-only">Mobile Number</label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
+                  <FaPhone className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   id="phone"
@@ -90,11 +90,11 @@ const LoginPage: React.FC = () => {
                 className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Send OTP
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <FaArrowRight className="ml-2 h-4 w-4" />
               </button>
             </div>
             <div className="mt-4 flex items-start p-2 bg-blue-50 rounded text-xs text-blue-800">
-                <Info className="w-4 h-4 mr-2 flex-shrink-0" />
+                <FaInfoCircle className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>
                     <strong>For Admin Access:</strong> Use ID <code>admin</code>.
                 </span>
@@ -106,7 +106,7 @@ const LoginPage: React.FC = () => {
               <label htmlFor="otp" className="sr-only">OTP / Password</label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <FaLock className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   id="otp"

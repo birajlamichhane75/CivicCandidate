@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getPendingVerifications, processVerification, getConstituencies } from '../services/dataService';
 import { VerificationRequest, Constituency } from '../types';
-import { Check, X, Eye, RefreshCw, BarChart2, Shield } from 'lucide-react';
+import { FaCheck, FaTimes, FaEye, FaSync, FaChartBar, FaShieldAlt } from 'react-icons/fa';
 
 const AdminDashboard: React.FC = () => {
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
@@ -29,7 +29,7 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <Shield className="w-8 h-8 mr-3 text-blue-700" />
+                <FaShieldAlt className="w-8 h-8 mr-3 text-blue-700" />
                 Admin Control Center
             </h1>
             <div className="bg-white rounded-lg p-1 shadow-sm flex">
@@ -52,7 +52,7 @@ const AdminDashboard: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-800">Verification Requests</h2>
-                    <button onClick={loadData} className="text-gray-500 hover:text-blue-600"><RefreshCw className="w-5 h-5" /></button>
+                    <button onClick={loadData} className="text-gray-500 hover:text-blue-600"><FaSync className="w-5 h-5" /></button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -77,15 +77,15 @@ const AdminDashboard: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <a href={req.id_image_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
-                                            <Eye className="w-4 h-4 mr-1" /> View ID
+                                            <FaEye className="w-4 h-4 mr-1" /> View ID
                                         </a>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <button onClick={() => handleVerification(req.id, true)} className="bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200 transition">
-                                            <Check className="w-4 h-4 inline" /> Approve
+                                            <FaCheck className="w-4 h-4 inline" /> Approve
                                         </button>
                                         <button onClick={() => handleVerification(req.id, false)} className="bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition">
-                                            <X className="w-4 h-4 inline" /> Reject
+                                            <FaTimes className="w-4 h-4 inline" /> Reject
                                         </button>
                                     </td>
                                 </tr>

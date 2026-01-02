@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { detectConstituency, getConstituencies } from '../services/dataService';
 import { Constituency } from '../types';
-import { Search, Users, Vote, ClipboardCheck } from 'lucide-react';
+import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck } from 'react-icons/fa';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -56,21 +56,21 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
                 <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ClipboardCheck className="w-8 h-8" />
+                    <FaClipboardCheck className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">1. Verify Identity</h3>
                 <p className="text-gray-600">Upload your ID and confirm address to ensure 1 citizen = 1 constituency.</p>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Vote className="w-8 h-8" />
+                    <FaVoteYea className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">2. Select Candidate</h3>
                 <p className="text-gray-600">Pre-election, vote for the most capable candidate to represent your area.</p>
             </div>
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
                 <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Users className="w-8 h-8" />
+                    <FaUsers className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">3. Ensure Accountability</h3>
                 <p className="text-gray-600">Post-election, raise issues, upvote problems, and track MP progress.</p>
@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white border-2 border-blue-100 p-8 rounded-2xl shadow-xl">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">
-              <Search className="w-6 h-6 mr-2 text-blue-600" />
+              <FaSearch className="w-6 h-6 mr-2 text-blue-600" />
               Find Your Constituency
             </h2>
             <AddressSelector onAddressChange={setAddress} />

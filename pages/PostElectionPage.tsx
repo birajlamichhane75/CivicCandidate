@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getIssues, reportIssue, upvoteIssue, getConstituencyById } from '../services/dataService';
 import { useAuth } from '../services/authService';
 import { Issue, Constituency } from '../types';
-import { AlertTriangle, ChevronUp, CheckCircle, Clock } from 'lucide-react';
+import { FaExclamationTriangle, FaChevronUp, FaCheckCircle, FaClock } from 'react-icons/fa';
 
 const PostElectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,7 +116,7 @@ const PostElectionPage: React.FC = () => {
                                     onClick={() => handleUpvote(issue.id)}
                                     className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-orange-500 transition"
                                 >
-                                    <ChevronUp className="w-8 h-8" />
+                                    <FaChevronUp className="w-8 h-8" />
                                 </button>
                                 <span className="font-bold text-lg text-gray-900">{issue.upvotes}</span>
                             </div>
@@ -165,17 +165,17 @@ const PostElectionPage: React.FC = () => {
                     <h3 className="text-md font-bold text-blue-900 mb-3">Progress Tracker</h3>
                     <div className="space-y-4">
                         <div className="flex items-center text-sm">
-                            <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                            <FaCheckCircle className="w-4 h-4 text-green-500 mr-2" />
                             <span className="flex-1">School Renovation</span>
                             <span className="font-bold text-green-700">Done</span>
                         </div>
                         <div className="flex items-center text-sm">
-                            <Clock className="w-4 h-4 text-yellow-500 mr-2" />
+                            <FaClock className="w-4 h-4 text-yellow-500 mr-2" />
                             <span className="flex-1">Water Supply Line</span>
                             <span className="font-bold text-yellow-700">60%</span>
                         </div>
                          <div className="flex items-center text-sm">
-                            <AlertTriangle className="w-4 h-4 text-gray-400 mr-2" />
+                            <FaExclamationTriangle className="w-4 h-4 text-gray-400 mr-2" />
                             <span className="flex-1 text-gray-500">Park Project</span>
                             <span className="text-gray-500">Planned</span>
                         </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { submitVerification, detectConstituency } from '../services/dataService';
 import { useAuth } from '../services/authService';
-import { Upload, CheckCircle } from 'lucide-react';
+import { FaCloudUploadAlt, FaCheckCircle } from 'react-icons/fa';
 
 const VerificationPage: React.FC = () => {
   const { user, updateUserVerification } = useAuth();
@@ -69,13 +69,13 @@ const VerificationPage: React.FC = () => {
               <div className="space-y-1 text-center">
                 {file ? (
                    <div className="flex flex-col items-center">
-                       <CheckCircle className="h-12 w-12 text-green-500 mb-2" />
+                       <FaCheckCircle className="h-12 w-12 text-green-500 mb-2" />
                        <p className="text-sm text-gray-900 font-medium">{file.name}</p>
                        <button type="button" onClick={() => setFile(null)} className="text-xs text-red-500 hover:text-red-700 mt-2">Change</button>
                    </div>
                 ) : (
                     <>
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <FaCloudUploadAlt className="mx-auto h-12 w-12 text-gray-400" />
                         <div className="flex text-sm text-gray-600">
                         <label
                             htmlFor="file-upload"

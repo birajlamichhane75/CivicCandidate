@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getCandidates, voteForCandidate, hasVoted } from '../services/dataService';
 import { useAuth } from '../services/authService';
 import { Candidate } from '../types';
-import { ThumbsUp, User as UserIcon, Award, ScrollText, Check } from 'lucide-react';
+import { FaThumbsUp, FaUser, FaAward, FaScroll, FaCheck } from 'react-icons/fa';
 
 const PreElectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,7 +59,7 @@ const PreElectionPage: React.FC = () => {
         </div>
         {userHasVoted && (
             <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold flex items-center">
-                <Check className="w-5 h-5 mr-2" /> You Have Voted
+                <FaCheck className="w-5 h-5 mr-2" /> You Have Voted
             </div>
         )}
       </div>
@@ -78,7 +78,7 @@ const PreElectionPage: React.FC = () => {
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="flex-shrink-0 flex flex-col items-center">
                                 <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 mb-2">
-                                    <UserIcon className="h-12 w-12" />
+                                    <FaUser className="h-12 w-12" />
                                 </div>
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-gray-900">{candidate.vote_count}</div>
@@ -89,7 +89,7 @@ const PreElectionPage: React.FC = () => {
                                 <h3 className="text-xl font-bold text-gray-900">{candidate.name}</h3>
                                 <div className="flex flex-wrap gap-2 mt-2 mb-4">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <Award className="w-3 h-3 mr-1" /> {candidate.qualification}
+                                        <FaAward className="w-3 h-3 mr-1" /> {candidate.qualification}
                                     </span>
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                         Background: {candidate.background}
@@ -98,7 +98,7 @@ const PreElectionPage: React.FC = () => {
                                 
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <ScrollText className="w-4 h-4 mr-2" /> Key Proposals
+                                        <FaScroll className="w-4 h-4 mr-2" /> Key Proposals
                                     </h4>
                                     <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
                                         {candidate.proposals.map((prop, idx) => (
@@ -117,7 +117,7 @@ const PreElectionPage: React.FC = () => {
                                         : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition'
                                     }`}
                                 >
-                                    <ThumbsUp className="w-5 h-5 mr-2" />
+                                    <FaThumbsUp className="w-5 h-5 mr-2" />
                                     {userHasVoted ? 'Voted' : 'Vote'}
                                 </button>
                             </div>
