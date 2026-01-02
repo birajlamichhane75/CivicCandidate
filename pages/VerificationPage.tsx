@@ -29,6 +29,10 @@ const VerificationPage: React.FC = () => {
         // Detect constituency for this user
         const constituencyId = await detectConstituency(address.province, address.district, address.municipality, address.ward);
         
+        // In real app, upload file to Supabase Storage here.
+        // For this demo, we simulate the URL.
+        const fakeImageUrl = `https://via.placeholder.com/400x300?text=ID+Card+${user.phone_number}`;
+
         await submitVerification({
             user_id: user.id,
             phone_number: user.phone_number,
@@ -36,7 +40,7 @@ const VerificationPage: React.FC = () => {
             district: address.district,
             municipality: address.municipality,
             ward: address.ward,
-            id_image_url: URL.createObjectURL(file), // Mock URL
+            id_image_url: fakeImageUrl, 
         });
 
         // Update local state to pending

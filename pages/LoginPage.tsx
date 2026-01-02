@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
-import { Phone, Lock, ArrowRight } from 'lucide-react';
+import { Phone, Lock, ArrowRight, Info } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
     setError('');
     
     // Basic validation
-    if (phoneNumber.length < 10 && !phoneNumber.includes('admin')) {
+    if (phoneNumber.length < 10 && phoneNumber !== 'admin') {
       setError('Please enter a valid 10-digit mobile number');
       return;
     }
@@ -31,13 +31,15 @@ const LoginPage: React.FC = () => {
     
     const success = await login(phoneNumber, otp);
     if (success) {
-      // Redirect to intended page or dashboard
       const from = (location.state as any)?.from?.pathname || '/';
-      // If going to verify but already verified, go to dashboard logic handled by ProtectedRoute
-      // Just navigating to from should work because ProtectedRoute handles checks
-      navigate(from);
+      // If admin, force go to admin dashboard
+      if (phoneNumber === 'admin') {
+          navigate('/admin');
+      } else {
+          navigate(from);
+      }
     } else {
-      setError('Invalid OTP. For demo use 123456');
+      setError('Invalid Credentials. See hint below.');
     }
   };
 
@@ -51,7 +53,7 @@ const LoginPage: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             {step === 'phone' 
               ? 'Enter your mobile number to receive a One-Time Password' 
-              : `Enter the 6-digit code sent to ${phoneNumber}`
+              : `Enter the code sent to ${phoneNumber}`
             }
           </p>
         </div>
@@ -91,11 +93,17 @@ const LoginPage: React.FC = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
             </div>
+            <div className="mt-4 flex items-start p-2 bg-blue-50 rounded text-xs text-blue-800">
+                <Info className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span>
+                    <strong>For Admin Access:</strong> Use ID <code>admin</code>.
+                </span>
+            </div>
           </form>
         ) : (
            <form className="mt-8 space-y-6" onSubmit={handleOtpSubmit}>
             <div>
-              <label htmlFor="otp" className="sr-only">OTP Code</label>
+              <label htmlFor="otp" className="sr-only">OTP / Password</label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -103,16 +111,18 @@ const LoginPage: React.FC = () => {
                 <input
                   id="otp"
                   name="otp"
-                  type="text"
+                  type="password"
                   required
-                  maxLength={6}
                   className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 tracking-widest text-center text-lg"
-                  placeholder="123456"
+                  placeholder="Enter Code"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                 />
               </div>
-              <p className="mt-2 text-xs text-center text-gray-500">Demo OTP: 123456</p>
+              <p className="mt-2 text-xs text-center text-gray-500">
+                  Default OTP: <code>123456</code><br/>
+                  Admin Password: <code>admin123</code>
+              </p>
             </div>
             <div className="flex space-x-3">
                <button
@@ -126,7 +136,7 @@ const LoginPage: React.FC = () => {
                 type="submit"
                 className="w-2/3 flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                Verify & Login
+                Login
               </button>
             </div>
           </form>

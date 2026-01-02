@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole, VerificationStatus } from '../types';
+import { supabase } from './supabaseClient';
+import { User, VerificationStatus } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -15,7 +16,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check local storage for session
     const storedUser = localStorage.getItem('demo_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -23,48 +23,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (identifier: string, secret: string): Promise<boolean> => {
-    // Demo Login Logic
-    // If identifier contains '@', assume admin login
-    if (identifier.includes('@')) {
+    // Admin Login
+    if (identifier === 'admin') {
       if (secret === 'admin123') {
-        const adminUser: User = {
-          id: 'admin-1',
-          phone_number: 'admin',
-          role: 'admin',
-          is_verified: true,
-          verification_status: 'approved',
-          full_name: 'System Admin'
-        };
-        setUser(adminUser);
-        localStorage.setItem('demo_user', JSON.stringify(adminUser));
-        return true;
+        const { data: adminUser, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('phone_number', 'admin')
+          .single();
+
+        if (adminUser) {
+           setUser(adminUser);
+           localStorage.setItem('demo_user', JSON.stringify(adminUser));
+           return true;
+        }
       }
-    } else {
-      // Citizen Login
-      if (secret === '123456') {
-        // Check if existing mock user
-        const citizenUser: User = {
-          id: `u-${identifier}`,
-          phone_number: identifier,
-          role: 'citizen',
-          is_verified: false, // Default to unverified for demo flow
-          verification_status: 'unverified', 
-        };
-        
-        // Simulating "Returning User" who is verified if phone is specific demo number
-        if (identifier === '9800000000') {
-            citizenUser.is_verified = true;
-            citizenUser.verification_status = 'approved';
-            citizenUser.constituency_id = 'ktm-1';
-            citizenUser.district = 'Kathmandu';
-            citizenUser.province = 'Bagmati Province';
+      return false;
+    }
+
+    // Citizen Login (Simulating OTP)
+    if (secret === '123456') {
+      try {
+        // Check if user exists
+        let { data: existingUser, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('phone_number', identifier)
+          .single();
+
+        if (!existingUser) {
+          // Register new user
+          const { data: newUser, error: createError } = await supabase
+            .from('users')
+            .insert([{ 
+                phone_number: identifier,
+                role: 'citizen',
+                verification_status: 'unverified'
+            }])
+            .select()
+            .single();
+          
+          if (createError) throw createError;
+          existingUser = newUser;
         }
 
-        setUser(citizenUser);
-        localStorage.setItem('demo_user', JSON.stringify(citizenUser));
+        setUser(existingUser);
+        localStorage.setItem('demo_user', JSON.stringify(existingUser));
         return true;
+      } catch (e) {
+        console.error("Login failed", e);
+        return false;
       }
     }
+    
     return false;
   };
 

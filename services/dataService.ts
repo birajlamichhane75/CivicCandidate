@@ -1,196 +1,220 @@
+import { supabase } from './supabaseClient';
 import { Constituency, Candidate, Issue, VerificationRequest, User } from '../types';
 import { MOCK_CONSTITUENCIES } from '../constants';
 
-// Simulated database
-let candidates: Candidate[] = [
-  {
-    id: 'c1',
-    user_id: 'u2',
-    constituency_id: 'ktm-1',
-    name: 'Sanjeev Sharma',
-    qualification: 'Masters in Public Policy',
-    background: 'Social worker for 10 years focusing on education.',
-    proposals: [
-      'Improve local government school infrastructure',
-      'Digitalize ward services',
-      'Create 500 local jobs annually',
-      'Clean Bagmati campaign',
-      'Free health checkups for elderly'
-    ],
-    vote_count: 1450
-  },
-  {
-    id: 'c2',
-    user_id: 'u3',
-    constituency_id: 'ktm-1',
-    name: 'Anjali Thapa',
-    qualification: 'Environmental Engineer',
-    background: 'Activist for urban green spaces.',
-    proposals: [
-      'Plant 10,000 trees',
-      'Waste management reform',
-      'Youth entrepreneurship fund',
-      'Women safety programs',
-      'Public transport overhaul'
-    ],
-    vote_count: 1320
-  },
-  {
-    id: 'c3',
-    user_id: 'u4',
-    constituency_id: 'ktm-1',
-    name: 'Ramesh Adhikari',
-    qualification: 'PhD in Economics',
-    background: 'Retired professor.',
-    proposals: [
-      'Local budget transparency',
-      'Small business tax relief',
-      'Community libraries',
-      'Skill development centers',
-      'Heritage preservation'
-    ],
-    vote_count: 980
-  }
-];
-
-let issues: Issue[] = [
-  {
-    id: 'i1',
-    constituency_id: 'ktm-1',
-    title: 'Broken Road in Baneshwor',
-    description: 'The main road near the complex has been broken for 6 months causing traffic jams.',
-    status: 'pending',
-    upvotes: 45,
-    created_by: '9841******',
-    created_at: '2023-10-15'
-  },
-  {
-    id: 'i2',
-    constituency_id: 'ktm-1',
-    title: 'No Water Supply in Ward 10',
-    description: 'We have not received Melamchi water for 2 weeks.',
-    status: 'in_progress',
-    upvotes: 120,
-    created_by: '9860******',
-    created_at: '2023-10-18'
-  },
-  {
-    id: 'i3',
-    constituency_id: 'ktm-2',
-    title: 'Street Lights Malfunction',
-    description: 'Pepsicola area street lights are not working.',
-    status: 'resolved',
-    upvotes: 15,
-    created_by: '9801******',
-    created_at: '2023-09-20'
-  }
-];
-
-let votes: Record<string, string> = {}; // voter_phone -> candidate_id
-let issueUpvotes: Record<string, Set<string>> = {}; // issue_id -> Set(voter_phones)
-let verificationRequests: VerificationRequest[] = [];
-
-export const getConstituencies = (): Promise<Constituency[]> => {
-  return Promise.resolve(MOCK_CONSTITUENCIES);
-};
-
-export const getConstituencyById = (id: string): Promise<Constituency | undefined> => {
-  return Promise.resolve(MOCK_CONSTITUENCIES.find(c => c.id === id));
-};
-
-export const detectConstituency = (province: string, district: string, municipality: string, ward: string): Promise<string> => {
-  // Deterministic mock logic
-  // In real app, this queries the GIS/Address database
-  if (district === 'Kathmandu') return Promise.resolve('ktm-1'); // Defaulting for demo
-  if (district === 'Lalitpur') return Promise.resolve('lal-1');
-  if (district === 'Kaski') return Promise.resolve('kas-1');
-  if (district === 'Rupandehi') return Promise.resolve('rup-1');
+// --- Constituencies ---
+export const getConstituencies = async (): Promise<Constituency[]> => {
+  const { data, error } = await supabase
+    .from('constituencies')
+    .select('*');
   
-  // Fallback
-  return Promise.resolve('ktm-1');
+  if (error) {
+    console.error('Error fetching constituencies:', error);
+    return MOCK_CONSTITUENCIES; // Fallback only if DB fails
+  }
+  return data || [];
 };
 
-// Candidate Operations
-export const getCandidates = (constituencyId: string): Promise<Candidate[]> => {
-  return Promise.resolve(candidates.filter(c => c.constituency_id === constituencyId).sort((a,b) => b.vote_count - a.vote_count));
+export const getConstituencyById = async (id: string): Promise<Constituency | undefined> => {
+  const { data, error } = await supabase
+    .from('constituencies')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (error) return undefined;
+  return data;
 };
 
-export const voteForCandidate = (candidateId: string, voterPhone: string): Promise<boolean> => {
-  if (votes[voterPhone]) return Promise.reject('Already voted');
+export const detectConstituency = async (province: string, district: string, municipality: string, ward: string): Promise<string> => {
+  // Logic remains client-side deterministic for this demo as we don't have a complex GIS backend
+  if (district === 'Kathmandu') return 'ktm-1';
+  if (district === 'Lalitpur') return 'lal-1';
+  if (district === 'Kaski') return 'kas-1';
+  if (district === 'Rupandehi') return 'rup-1';
+  return 'ktm-1';
+};
+
+// --- Candidates ---
+export const getCandidates = async (constituencyId: string): Promise<Candidate[]> => {
+  const { data, error } = await supabase
+    .from('candidates')
+    .select('*')
+    .eq('constituency_id', constituencyId)
+    .order('vote_count', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const voteForCandidate = async (candidateId: string, voterPhone: string): Promise<boolean> => {
+  // Check if already voted
+  const { data: existingVote } = await supabase
+    .from('votes')
+    .select('*')
+    .eq('user_phone', voterPhone)
+    .single();
+
+  if (existingVote) return Promise.reject('Already voted');
+
+  // Insert vote
+  const { error: voteError } = await supabase
+    .from('votes')
+    .insert([{ user_phone: voterPhone, candidate_id: candidateId }]);
+
+  if (voteError) throw voteError;
+
+  // Increment candidate count (RPC or manual update)
+  // For simplicity doing manual fetch-update, but RPC `increment` is better for concurrency
+  const { data: candidate } = await supabase.from('candidates').select('vote_count').eq('id', candidateId).single();
   
-  const candidate = candidates.find(c => c.id === candidateId);
   if (candidate) {
-    candidate.vote_count++;
-    votes[voterPhone] = candidateId;
-    return Promise.resolve(true);
+    await supabase
+      .from('candidates')
+      .update({ vote_count: candidate.vote_count + 1 })
+      .eq('id', candidateId);
   }
-  return Promise.reject('Candidate not found');
+
+  return true;
 };
 
-export const hasVoted = (voterPhone: string): Promise<boolean> => {
-  return Promise.resolve(!!votes[voterPhone]);
+export const hasVoted = async (voterPhone: string): Promise<boolean> => {
+  const { data } = await supabase
+    .from('votes')
+    .select('*')
+    .eq('user_phone', voterPhone)
+    .single();
+  return !!data;
 };
 
-export const registerCandidate = (candidateData: Omit<Candidate, 'id' | 'vote_count'>): Promise<Candidate> => {
-  const newCandidate: Candidate = {
-    ...candidateData,
-    id: `c${Date.now()}`,
-    vote_count: 0
-  };
-  candidates.push(newCandidate);
-  return Promise.resolve(newCandidate);
+export const registerCandidate = async (candidateData: Omit<Candidate, 'id' | 'vote_count'>): Promise<Candidate> => {
+  const { data, error } = await supabase
+    .from('candidates')
+    .insert([{ ...candidateData, vote_count: 0 }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
-// Issue Operations
-export const getIssues = (constituencyId: string): Promise<Issue[]> => {
-  return Promise.resolve(issues.filter(i => i.constituency_id === constituencyId).sort((a,b) => b.upvotes - a.upvotes));
+// --- Issues ---
+export const getIssues = async (constituencyId: string): Promise<Issue[]> => {
+  const { data, error } = await supabase
+    .from('issues')
+    .select('*')
+    .eq('constituency_id', constituencyId)
+    .order('upvotes', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 };
 
-export const reportIssue = (issueData: Omit<Issue, 'id' | 'upvotes' | 'created_at'>): Promise<Issue> => {
-  const newIssue: Issue = {
-    ...issueData,
-    id: `i${Date.now()}`,
-    upvotes: 0,
-    created_at: new Date().toISOString().split('T')[0]
-  };
-  issues.push(newIssue);
-  return Promise.resolve(newIssue);
+export const reportIssue = async (issueData: Omit<Issue, 'id' | 'upvotes' | 'created_at'>): Promise<Issue> => {
+  const { data, error } = await supabase
+    .from('issues')
+    .insert([{ ...issueData, upvotes: 0 }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
-export const upvoteIssue = (issueId: string, voterPhone: string): Promise<boolean> => {
-  if (!issueUpvotes[issueId]) issueUpvotes[issueId] = new Set();
-  
-  if (issueUpvotes[issueId].has(voterPhone)) return Promise.reject("Already upvoted");
-  
-  const issue = issues.find(i => i.id === issueId);
+export const upvoteIssue = async (issueId: string, voterPhone: string): Promise<boolean> => {
+  // Check if already upvoted
+  const { data: existing } = await supabase
+    .from('issue_upvotes')
+    .select('*')
+    .eq('issue_id', issueId)
+    .eq('user_phone', voterPhone)
+    .single();
+
+  if (existing) return Promise.reject("Already upvoted");
+
+  // Record upvote
+  const { error } = await supabase
+    .from('issue_upvotes')
+    .insert([{ issue_id: issueId, user_phone: voterPhone }]);
+
+  if (error) throw error;
+
+  // Increment count
+  const { data: issue } = await supabase.from('issues').select('upvotes').eq('id', issueId).single();
   if (issue) {
-    issue.upvotes++;
-    issueUpvotes[issueId].add(voterPhone);
-    return Promise.resolve(true);
+    await supabase.from('issues').update({ upvotes: issue.upvotes + 1 }).eq('id', issueId);
   }
-  return Promise.reject("Issue not found");
+
+  return true;
 };
 
-// Admin / Verification
-export const submitVerification = (req: Omit<VerificationRequest, 'id' | 'submitted_at'>): Promise<boolean> => {
-  verificationRequests.push({
-    ...req,
-    id: `vr${Date.now()}`,
-    submitted_at: new Date().toISOString()
-  });
-  return Promise.resolve(true);
-};
-
-export const getPendingVerifications = (): Promise<VerificationRequest[]> => {
-  return Promise.resolve(verificationRequests);
-};
-
-export const processVerification = (requestId: string, approved: boolean, adminUser?: User): Promise<void> => {
-  const index = verificationRequests.findIndex(r => r.id === requestId);
-  if (index === -1) return Promise.reject('Request not found');
+// --- Admin / Verification ---
+export const submitVerification = async (req: Omit<VerificationRequest, 'id' | 'submitted_at' | 'status'>): Promise<boolean> => {
+  // 1. Create verification request
+  const { error } = await supabase
+    .from('verification_requests')
+    .insert([req]);
   
-  // In a real app, if approved, we move data to Users table and update status
-  // Here we just remove from queue for demo
-  verificationRequests.splice(index, 1);
-  return Promise.resolve();
+  if (error) throw error;
+
+  // 2. Update user status to pending
+  await supabase
+    .from('users')
+    .update({ 
+        verification_status: 'pending',
+        province: req.province,
+        district: req.district,
+        municipality: req.municipality,
+        ward: req.ward,
+        id_image_url: req.id_image_url
+    })
+    .eq('id', req.user_id);
+
+  return true;
+};
+
+export const getPendingVerifications = async (): Promise<VerificationRequest[]> => {
+  const { data, error } = await supabase
+    .from('verification_requests')
+    .select('*')
+    .eq('status', 'pending');
+  
+  if (error) return [];
+  return data || [];
+};
+
+export const processVerification = async (requestId: string, approved: boolean): Promise<void> => {
+  const { data: request } = await supabase
+    .from('verification_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single();
+
+  if (!request) throw new Error("Request not found");
+
+  const newStatus = approved ? 'approved' : 'rejected';
+
+  // Update request status
+  await supabase
+    .from('verification_requests')
+    .update({ status: newStatus })
+    .eq('id', requestId);
+
+  // Update user status
+  await supabase
+    .from('users')
+    .update({ 
+        verification_status: newStatus, 
+        is_verified: approved,
+        // If approved, we confirm the constituency. In a real app, this comes from the detected ID.
+        // For now, we will just re-detect or trust the data service to have set it when requesting.
+        // The VerificationPage logic updates local state, but here we persist.
+        // We'll set a default constituency if approved for the demo based on mapping
+    })
+    .eq('id', request.user_id);
+    
+  if (approved) {
+     const constituencyId = await detectConstituency(request.province, request.district, request.municipality, request.ward);
+     await supabase.from('users').update({ constituency_id: constituencyId }).eq('id', request.user_id);
+  }
 };
