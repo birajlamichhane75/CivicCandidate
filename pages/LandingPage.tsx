@@ -32,8 +32,8 @@ const LandingPage: React.FC = () => {
   };
 
   const filteredConstituencies = constituencies.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          c.district.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.district.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProvince = selectedProvince ? c.province === selectedProvince : true;
     return matchesSearch && matchesProvince;
   });
@@ -91,12 +91,20 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#find-constituency"
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default jump
+                const target = document.getElementById('find-constituency');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="bg-[#0b3c5d] text-white px-8 py-3 rounded-sm 
-                        font-semibold text-lg shadow-md 
-                        hover:bg-[#072c45] transition"
+             font-semibold text-lg shadow-md 
+             hover:bg-[#072c45] transition cursor-pointer"
             >
               {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
             </a>
+
 
             <Link
               to="/verify"
@@ -119,40 +127,40 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
-                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
-                    <FaClipboardCheck className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">1. {t('पहिचान प्रमाणीकरण', 'Verify Identity')}</h3>
-                <p className="text-slate-600 text-sm">
-                  {t(
-                    'आफ्नो परिचय पत्र अपलोड गर्नुहोस् र आफ्नो निर्वाचन क्षेत्र यकिन गर्नुहोस्।',
-                    'Upload your ID document and confirm your constituency.'
-                  )}
-                </p>
+              <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
+                <FaClipboardCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">1. {t('पहिचान प्रमाणीकरण', 'Verify Identity')}</h3>
+              <p className="text-slate-600 text-sm">
+                {t(
+                  'आफ्नो परिचय पत्र अपलोड गर्नुहोस् र आफ्नो निर्वाचन क्षेत्र यकिन गर्नुहोस्।',
+                  'Upload your ID document and confirm your constituency.'
+                )}
+              </p>
             </div>
             <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
-                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
-                    <FaVoteYea className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">2. {t('उम्मेदवार चयन', 'Vote')}</h3>
-                <p className="text-slate-600 text-sm">
-                  {t(
-                    'निर्वाचन पूर्व, योग्य उम्मेदवारको प्रस्ताव हेर्नुहोस् र मतदान गर्नुहोस्।',
-                    'Before elections, review candidate proposals and cast your vote.'
-                  )}
-                </p>
+              <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
+                <FaVoteYea className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">2. {t('उम्मेदवार चयन', 'Vote')}</h3>
+              <p className="text-slate-600 text-sm">
+                {t(
+                  'निर्वाचन पूर्व, योग्य उम्मेदवारको प्रस्ताव हेर्नुहोस् र मतदान गर्नुहोस्।',
+                  'Before elections, review candidate proposals and cast your vote.'
+                )}
+              </p>
             </div>
             <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
-                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
-                    <FaUsers className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">3. {t('जवाफदेहिता', 'Accountability')}</h3>
-                <p className="text-slate-600 text-sm">
-                  {t(
-                    'निर्वाचन पश्चात, समस्या दर्ता गर्नुहोस् र प्रतिनिधिको कामको निगरानी गर्नुहोस्।',
-                    'After elections, report local issues and track representative progress.'
-                  )}
-                </p>
+              <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
+                <FaUsers className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold mb-2">3. {t('जवाफदेहिता', 'Accountability')}</h3>
+              <p className="text-slate-600 text-sm">
+                {t(
+                  'निर्वाचन पश्चात, समस्या दर्ता गर्नुहोस् र प्रतिनिधिको कामको निगरानी गर्नुहोस्।',
+                  'After elections, report local issues and track representative progress.'
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -169,7 +177,7 @@ const LandingPage: React.FC = () => {
             {/* Search is general UI, so isBilingual={false} uses the Toggle mode */}
             <AddressSelector onAddressChange={setAddress} isBilingual={false} />
             <div className="mt-8 pt-4 border-t border-slate-100 flex justify-end">
-              <button 
+              <button
                 onClick={handleFindConstituency}
                 className="w-full sm:w-auto bg-[#0094da] text-white px-8 py-3 rounded-sm font-semibold hover:bg-[#007bb8] transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 disabled={!address.ward}
@@ -184,9 +192,9 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-2xl font-bold text-slate-900 mb-4">
                   {constituencies.find(c => c.id === detectedId)?.name || detectedId}
                 </h3>
-                <button 
-                   onClick={() => navigate(`/constituency/${detectedId}`)}
-                   className="inline-block bg-[#0094da] text-white px-6 py-2 rounded-sm font-medium hover:bg-[#007bb8] text-sm transition"
+                <button
+                  onClick={() => navigate(`/constituency/${detectedId}`)}
+                  className="inline-block bg-[#0094da] text-white px-6 py-2 rounded-sm font-medium hover:bg-[#007bb8] text-sm transition"
                 >
                   {t('ड्यासबोर्डमा जानुहोस्', 'Go to Dashboard')}
                 </button>
@@ -201,29 +209,29 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-200 pb-4">
             <h2 className="text-xl font-bold text-slate-900">{t('निर्वाचन क्षेत्रहरू', 'Constituency Directory')}</h2>
-            
+
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaSearch className="text-slate-400 w-3 h-3" />
-                    </div>
-                    <input 
-                        type="text"
-                        placeholder={t('जिल्ला खोज्नुहोस्...', 'Search district...')}
-                        className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] w-full text-sm font-english"
-                        value={searchTerm}
-                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                    />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-slate-400 w-3 h-3" />
                 </div>
-                
-                <select 
-                    className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] text-sm font-english bg-white"
-                    value={selectedProvince}
-                    onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
-                >
-                    <option value="">{t('सबै प्रदेश', 'All Provinces')}</option>
-                    {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <input
+                  type="text"
+                  placeholder={t('जिल्ला खोज्नुहोस्...', 'Search district...')}
+                  className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] w-full text-sm font-english"
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                />
+              </div>
+
+              <select
+                className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] text-sm font-english bg-white"
+                value={selectedProvince}
+                onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
+              >
+                <option value="">{t('सबै प्रदेश', 'All Provinces')}</option>
+                {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
             </div>
           </div>
 
@@ -238,17 +246,17 @@ const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-[#0094da] transition">{c.name}</h3>
                 <div className="flex items-center space-x-3 pt-3 border-t border-slate-100">
-                   {c.mp_image ? (
-                      <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 grayscale group-hover:grayscale-0 transition object-cover rounded-sm" />
-                   ) : (
-                      <div className="w-8 h-8 bg-slate-100 flex items-center justify-center text-slate-400 rounded-sm">
-                           <FaBuilding className="w-3 h-3" />
-                      </div>
-                   )}
-                   <div className="text-xs">
-                      <p className="text-slate-500">{t('प्रतिनिधि', 'Representative')}</p>
-                      <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || t("पद रिक्त", "Vacant")}</p>
-                   </div>
+                  {c.mp_image ? (
+                    <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 grayscale group-hover:grayscale-0 transition object-cover rounded-sm" />
+                  ) : (
+                    <div className="w-8 h-8 bg-slate-100 flex items-center justify-center text-slate-400 rounded-sm">
+                      <FaBuilding className="w-3 h-3" />
+                    </div>
+                  )}
+                  <div className="text-xs">
+                    <p className="text-slate-500">{t('प्रतिनिधि', 'Representative')}</p>
+                    <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || t("पद रिक्त", "Vacant")}</p>
+                  </div>
                 </div>
                 <div className="mt-4">
                   <Link to={`/constituency/${c.id}`} className="text-xs font-bold text-[#0094da] hover:underline uppercase tracking-wide">
@@ -261,45 +269,44 @@ const LandingPage: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-              <div className="mt-12 flex justify-center items-center space-x-1">
-                  <button 
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-                  >
-                      <FaChevronLeft className="w-3 h-3" />
-                  </button>
-                  
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum = i + 1;
-                      if (totalPages > 5 && currentPage > 3) {
-                          pageNum = currentPage - 3 + i;
-                          if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                      }
-                      
-                      return (
-                        <button
-                            key={pageNum}
-                            onClick={() => goToPage(pageNum)}
-                            className={`w-8 h-8 text-sm font-medium transition rounded-sm ${
-                                currentPage === pageNum 
-                                ? 'bg-[#0094da] text-white border border-[#0094da]' 
-                                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                            }`}
-                        >
-                            {pageNum}
-                        </button>
-                      );
-                  })}
+            <div className="mt-12 flex justify-center items-center space-x-1">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+              >
+                <FaChevronLeft className="w-3 h-3" />
+              </button>
 
-                  <button 
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5 && currentPage > 3) {
+                  pageNum = currentPage - 3 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => goToPage(pageNum)}
+                    className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
+                        ? 'bg-[#0094da] text-white border border-[#0094da]'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      }`}
                   >
-                      <FaChevronRight className="w-3 h-3" />
+                    {pageNum}
                   </button>
-              </div>
+                );
+              })}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+              >
+                <FaChevronRight className="w-3 h-3" />
+              </button>
+            </div>
           )}
         </div>
       </div>
