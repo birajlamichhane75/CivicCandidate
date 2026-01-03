@@ -90,12 +90,7 @@ const LoginPage: React.FC = () => {
                 <FaArrowRight className="ml-2 h-4 w-4" />
               </button>
             </div>
-            <div className="mt-4 flex items-start p-3 bg-slate-50 border border-slate-200 rounded-sm text-xs text-slate-600 font-english">
-                <FaInfoCircle className="w-4 h-4 mr-2 flex-shrink-0 text-slate-500" />
-                <span>
-                    <strong>Admin Access:</strong> ID: <code>admin</code>
-                </span>
-            </div>
+            
           </form>
         ) : (
            <form className="space-y-6" onSubmit={handleOtpSubmit}>
@@ -111,13 +106,13 @@ const LoginPage: React.FC = () => {
                   type="password"
                   required
                   className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 tracking-widest text-center text-lg focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
-                  placeholder="------"
+                  placeholder="_ _ _ _ _ _"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                 />
               </div>
               <p className="mt-2 text-xs text-center text-slate-400 font-english">
-                  Default: <code>123456</code> | Admin: <code>admin123</code>
+                  Demo: <code>123456</code>
               </p>
             </div>
             <div className="flex space-x-3">

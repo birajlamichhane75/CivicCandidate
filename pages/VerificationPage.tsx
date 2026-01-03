@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { submitVerification, detectConstituency } from '../services/dataService';
 import { useAuth } from '../services/authService';
-import { FaCloudUploadAlt, FaCheckCircle, FaIdCard } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaCheckCircle, FaIdCard, FaShieldAlt } from 'react-icons/fa';
 
 const VerificationPage: React.FC = () => {
   const { user, updateUserVerification } = useAuth();
@@ -11,6 +11,7 @@ const VerificationPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -20,7 +21,7 @@ const VerificationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !file || !address.ward) return;
+    if (!user || !file || !address.ward || !isConfirmed) return;
 
     setIsSubmitting(true);
     setTimeout(async () => {
@@ -41,6 +42,8 @@ const VerificationPage: React.FC = () => {
         navigate('/verification-status');
     }, 1500);
   };
+
+  const isFormFilled = file && address.ward;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -102,17 +105,58 @@ const VerificationPage: React.FC = () => {
           </div>
 
           <div className="pt-4 border-t border-slate-100">
+            {/* Confirmation Checkbox */}
+            <div className={`mb-6 p-5 border rounded-sm transition-colors duration-200 ${isConfirmed ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+               <label className="flex items-start space-x-3 cursor-pointer group">
+                  <div className="flex items-center h-6">
+                    <input
+                      type="checkbox"
+                      checked={isConfirmed}
+                      onChange={(e) => setIsConfirmed(e.target.checked)}
+                      className="h-5 w-5 text-[#0094da] border-slate-300 rounded focus:ring-[#0094da] cursor-pointer"
+                    />
+                  </div>
+                  <div className="text-sm text-slate-700 space-y-3">
+                     <div className="flex items-start">
+                        <FaShieldAlt className="w-4 h-4 text-slate-400 mt-0.5 mr-2 flex-shrink-0" />
+                        <div>
+                           <p className="font-medium text-slate-900">
+                              म पुष्टि गर्छु कि मेरो परिचयपत्र केवल प्रशासकको प्रमाणिकरणको लागि प्रयोग हुनेछ। विकासकर्ताले पहुँच पाउँदैनन्।
+                           </p>
+                           <p className="text-xs text-slate-500 font-english mt-1">
+                              I confirm that my ID is submitted only for admin verification. Developers or anyone else do not have access.
+                           </p>
+                        </div>
+                     </div>
+                     <div className="flex items-start">
+                         <div className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></div>
+                         <div>
+                            <p className="font-medium text-slate-900">
+                               मैले दिएका सबै विवरण सत्य हुन् र झूटो जानकारी वा परिचयपत्र भए कानुनी कारवाही हुन सक्छ भन्ने बुझ्दछु।
+                            </p>
+                            <p className="text-xs text-slate-500 font-english mt-1">
+                               I confirm that all information provided is true. Providing fake information or ID may result in legal action.
+                            </p>
+                         </div>
+                     </div>
+                  </div>
+               </label>
+            </div>
+
+            {/* Warning Message if form filled but not confirmed */}
+            {isFormFilled && !isConfirmed && (
+               <div className="text-amber-600 text-sm mb-3 font-medium flex items-center justify-center animate-pulse">
+                  * सबमिट गर्नुअघि माथिको बक्समा टिक लगाउनुहोस् (Please confirm before submitting)
+               </div>
+            )}
+
             <button
               type="submit"
-              disabled={isSubmitting || !file || !address.ward}
-              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-sm shadow-sm text-base font-bold text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none disabled:bg-slate-400 disabled:cursor-not-allowed transition"
+              disabled={isSubmitting || !isFormFilled || !isConfirmed}
+              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-sm shadow-sm text-base font-bold text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed transition"
             >
               {isSubmitting ? 'प्रक्रियामा छ... (Submitting...)' : 'पेश गर्नुहोस् (Submit for Verification)'}
             </button>
-            <p className="mt-4 text-xs text-slate-500 text-center max-w-2xl mx-auto">
-              मैले पेश गरेको विवरण सत्य छ र झुटो ठहरेमा कानून बमोजिम सहुँला/बुझाउँला।
-              <br/><span className="font-english opacity-70">(I declare the information provided is true. False submission is punishable by law.)</span>
-            </p>
           </div>
         </form>
       </div>
