@@ -53,31 +53,59 @@ const LandingPage: React.FC = () => {
   return (
     <div className="bg-slate-50">
       {/* Hero Section - Official Tone */}
-      <div className="bg-[#0094da] text-white relative border-b border-slate-700">
-        <div className="absolute inset-0 bg-[#0094da] opacity-50 pattern-grid-lg"></div>
+      <div className="bg-[#0094da] text-white relative border-b border-white/20">
+        {/* pattern overlay */}
+        <div className="absolute inset-0 bg-[#0b3c5d] opacity-20 pattern-grid-lg"></div>
+
         <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 text-center">
-          <div className="inline-block border border-[#ffffff] rounded-full px-4 py-1 mb-6 bg-slate-800 backdrop-blur-sm">
-             <span className="text-sm font-medium tracking-wide">
-               {t('नागरिक सहभागिता', 'Civic Participation')}
-             </span>
+
+          {/* Badge */}
+          <div className="inline-block rounded-full px-4 py-1 mb-6 bg-white/15 backdrop-blur-sm border border-white/30">
+            <span className="text-sm font-medium tracking-wide">
+              {t('नागरिक सहभागिता', 'Civic Participation')}
+            </span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
-            {t('लोकतान्त्रिक प्रक्रियामा', 'In the Democratic Process')} <br/>
-            <span className="text-slate-800">{t('तपाईंको सहभागिता', 'Your Participation')}</span>
+
+          {/* App Name Heading */}
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 leading-tight">
+            {t('नागरिकको उम्मेदवार', 'Citizen’s Candidate')}
           </h1>
-          <p className="text-lg md:text-xl text-[#ffffff] font-english mb-8 max-w-2xl mx-auto">
+
+          {/* Tagline / Short Description */}
+          <p className="text-xl md:text-2xl text-[#e6f4fb] mb-8 font-medium max-w-5xl mx-auto leading-relaxed">
+            {t(
+              'तपाईंको आवाज, तपाईंको उम्मेदवार, तपाईंको सम्पर्क',
+              'Your Voice, Your Candidate, Your Post‑Election Connection'
+            )}
+          </p>
+
+          {/* Context Description */}
+          <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto font-light">
             {t(
               'लोकतन्त्रको सुरुवात तपाईंबाट हुन्छ। आफ्नो क्षेत्रमा सहभागी हुनुहोस्, उम्मेदवार छान्नुहोस् र जवाफदेहिता सुनिश्चित गर्नुहोस्।',
               'Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.'
             )}
           </p>
+
+          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <a href="#find-constituency" className="bg-slate-800 text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-[#007bb8] transition shadow-md border border-transparent">
-                {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
-             </a>
-             <Link to="/verify" className="bg-transparent border border-[#ffffff] text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-800 transition">
-                {t('प्रमाणीकरण', 'Verify Identity')}
-             </Link>
+            <a
+              href="#find-constituency"
+              className="bg-[#0b3c5d] text-white px-8 py-3 rounded-sm 
+                        font-semibold text-lg shadow-md 
+                        hover:bg-[#072c45] transition"
+            >
+              {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
+            </a>
+
+            <Link
+              to="/verify"
+              className="bg-white/10 border border-white/40 text-white 
+                        px-8 py-3 rounded-sm font-semibold text-lg 
+                        hover:bg-white/20 transition"
+            >
+              {t('प्रमाणीकरण', 'Verify Identity')}
+            </Link>
           </div>
         </div>
       </div>
@@ -87,7 +115,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-slate-900">{t('प्रक्रिया', 'Process')}</h2>
-            <p className="mt-2 text-slate-500 font-english">How Nagarik Aawaz works</p>
+            <p className="mt-2 text-slate-500 font-english">How Citizen’s Candidate works</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">

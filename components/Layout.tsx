@@ -42,12 +42,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <FaUserShield className="h-6 w-6" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-xl text-slate-900 leading-tight">
-                    {t('नागरिक आवाज', 'Nagarik Aawaz')}
+                  <span className="font-bold text-lg md:text-xl text-slate-900 leading-tight">
+                    {t('नागरिकको उम्मेदवार', 'Citizen’s Candidate')}
                   </span>
-                  <span className="text-xs text-[#0094da] font-bold uppercase tracking-wider font-english">
-                    Civic Tech
-                  </span>
+                  
                 </div>
               </Link>
             </div>
@@ -171,7 +169,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-white text-lg font-bold mb-4 flex items-center">
-              <FaUserShield className="h-5 w-5 mr-3 text-[#0094da]" /> {t('नागरिक आवाज', 'Nagarik Aawaz')}
+              <FaUserShield className="h-5 w-5 mr-3 text-[#0094da]" /> {t('नागरिकको उम्मेदवार', 'Citizen’s Candidate')}
             </h3>
             <p className="text-sm leading-relaxed mb-4">
               {t(
@@ -191,11 +189,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="md:border-l md:border-slate-800 md:pl-8">
             <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">{t('सम्पर्क', 'Contact')}</h4>
             <p className="text-sm">{t('काठमाडौँ, नेपाल', 'Kathmandu, Nepal')}</p>
-            <p className="text-sm mt-2 font-english">support@nagarikaawaz.org</p>
+            <p className="text-sm mt-2 font-english">support@citizenscandidate.org</p>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-8 border-t border-slate-800 text-xs text-center font-english text-slate-500">
-          &copy; {new Date().getFullYear()} Nagarik Aawaz. Civic Tech Initiative.
+          &copy; {new Date().getFullYear()} Citizen’s Candidate. Civic Tech Initiative.
         </div>
       </footer>
     </div>

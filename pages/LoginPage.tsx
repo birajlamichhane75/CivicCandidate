@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-sm text-slate-500 font-english">
             {step === 'phone' 
-              ? t('नागरिक आवाज पोर्टलमा सुरक्षित पहुँच।', 'Secure access to Nagarik Aawaz portal.') 
+              ? t('नागरिकको उम्मेदवार पोर्टलमा सुरक्षित पहुँच।', 'Secure access to Citizen’s Candidate portal.') 
               : `${t('कोड पठाइयो', 'Code sent to')} ${phoneNumber}`
             }
           </p>
