@@ -60,7 +60,7 @@ const VerificationPage: React.FC = () => {
           {/* Section 1: ID Upload */}
           <div className="bg-slate-50 p-6 border border-slate-200 rounded-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-              <span className="bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">1</span>
+              <span className="bg-[#0094da] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">1</span>
               परिचय पत्र (Identity Document)
             </h3>
             <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-sm bg-white hover:bg-slate-50 transition">
@@ -73,11 +73,11 @@ const VerificationPage: React.FC = () => {
                    </div>
                 ) : (
                     <>
-                        <FaCloudUploadAlt className="mx-auto h-12 w-12 text-slate-400" />
+                        <FaCloudUploadAlt className="mx-auto h-12 w-12 text-[#0094da]" />
                         <div className="flex text-sm text-slate-600 justify-center">
                         <label
                             htmlFor="file-upload"
-                            className="relative cursor-pointer bg-white rounded-sm font-medium text-slate-900 hover:text-blue-800 focus-within:outline-none"
+                            className="relative cursor-pointer bg-white rounded-sm font-medium text-[#0094da] hover:text-[#007bb8] focus-within:outline-none"
                         >
                             <span className="underline">अपलोड गर्नुहोस् (Upload File)</span>
                             <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" required />
@@ -93,7 +93,7 @@ const VerificationPage: React.FC = () => {
           {/* Section 2: Address */}
           <div className="bg-slate-50 p-6 border border-slate-200 rounded-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-              <span className="bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">2</span>
+              <span className="bg-[#0094da] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">2</span>
               स्थायी ठेगाना (Permanent Address)
             </h3>
             <div className="bg-white p-4 border border-slate-200">
@@ -105,7 +105,7 @@ const VerificationPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || !file || !address.ward}
-              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-sm shadow-sm text-base font-bold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none disabled:bg-slate-400 disabled:cursor-not-allowed transition"
+              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-sm shadow-sm text-base font-bold text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none disabled:bg-slate-400 disabled:cursor-not-allowed transition"
             >
               {isSubmitting ? 'प्रक्रियामा छ... (Submitting...)' : 'पेश गर्नुहोस् (Submit for Verification)'}
             </button>

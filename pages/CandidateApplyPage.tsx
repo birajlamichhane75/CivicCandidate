@@ -50,7 +50,7 @@ const CandidateApplyPage: React.FC = () => {
     navigate(`/constituency/${id}/pre-election`);
   };
 
-  const inputClass = "mt-1 block w-full border border-slate-300 rounded-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 sm:text-sm";
+  const inputClass = "mt-1 block w-full border border-slate-300 rounded-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] sm:text-sm";
   const labelClass = "block text-sm font-semibold text-slate-700";
 
   return (
@@ -58,7 +58,7 @@ const CandidateApplyPage: React.FC = () => {
       <div className="bg-white rounded-sm border border-slate-200 shadow-sm p-8">
         <div className="border-b border-slate-100 pb-6 mb-8">
             <h1 className="text-2xl font-bold text-slate-900 flex items-center">
-                <FaUserEdit className="mr-3" />
+                <FaUserEdit className="mr-3 text-[#0094da]" />
                 उम्मेदवारी दर्ता फारम (Candidate Registration)
             </h1>
             <p className="text-slate-500 mt-2 text-sm">आफ्नो निर्वाचन क्षेत्रको नेतृत्व गर्न तयार हुनुहोस्। (Step forward to lead.)</p>
@@ -103,7 +103,7 @@ const CandidateApplyPage: React.FC = () => {
                          </div>
                      ))}
                  </div>
-                 <button type="button" onClick={addProposal} className="mt-4 text-sm text-slate-700 font-bold flex items-center hover:text-slate-900">
+                 <button type="button" onClick={addProposal} className="mt-4 text-sm text-[#0094da] font-bold flex items-center hover:text-[#007bb8]">
                      <FaPlus className="w-3 h-3 mr-1" /> थप गर्नुहोस् (Add Proposal)
                  </button>
             </div>
@@ -112,7 +112,7 @@ const CandidateApplyPage: React.FC = () => {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-sm shadow-sm text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none transition uppercase tracking-wide"
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-sm shadow-sm text-sm font-bold text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition uppercase tracking-wide"
                 >
                     {isSubmitting ? 'प्रक्रियामा... (Processing...)' : 'दर्ता गर्नुहोस् (Submit Candidacy)'}
                 </button>

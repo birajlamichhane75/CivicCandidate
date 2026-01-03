@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { PROVINCES, DISTRICTS, MUNICIPALITIES } from '../constants';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface AddressSelectorProps {
   onAddressChange: (address: { province: string; district: string; municipality: string; ward: string }) => void;
   initialAddress?: { province: string; district: string; municipality: string; ward: string };
+  isBilingual?: boolean;
 }
 
-const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, initialAddress }) => {
+const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, initialAddress, isBilingual = true }) => {
+  const { t } = useLanguage();
   const [province, setProvince] = useState(initialAddress?.province || '');
   const [district, setDistrict] = useState(initialAddress?.district || '');
   const [municipality, setMunicipality] = useState(initialAddress?.municipality || '');
@@ -41,20 +44,29 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
   const availableDistricts = province ? DISTRICTS[province] || [] : [];
   const availableMunicipalities = district ? (MUNICIPALITIES[district] || MUNICIPALITIES['Default']) : [];
 
-  const selectClass = "w-full bg-white border border-slate-300 rounded-sm p-3 text-slate-800 focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-english disabled:bg-slate-100 disabled:text-slate-400";
+  const selectClass = "w-full bg-white border border-slate-300 rounded-sm p-3 text-slate-800 focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english disabled:bg-slate-100 disabled:text-slate-400";
   const labelClass = "block text-sm font-semibold text-slate-700 mb-1";
+
+  const getLabel = (ne: string, en: string) => {
+    if (isBilingual) return `${ne} (${en})`;
+    return t(ne, en);
+  };
+
+  const getPlaceholder = () => {
+     return isBilingual ? "छान्नुहोस् (Select)" : t("छान्नुहोस्", "Select");
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label className={labelClass}>प्रदेश (Province)</label>
+        <label className={labelClass}>{getLabel('प्रदेश', 'Province')}</label>
         <select
           value={province}
           onChange={(e) => setProvince(e.target.value)}
           className={selectClass}
           required
         >
-          <option value="">छान्नुहोस् (Select)</option>
+          <option value="">{getPlaceholder()}</option>
           {PROVINCES.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
@@ -62,7 +74,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className={labelClass}>जिल्ला (District)</label>
+        <label className={labelClass}>{getLabel('जिल्ला', 'District')}</label>
         <select
           value={district}
           onChange={(e) => setDistrict(e.target.value)}
@@ -70,7 +82,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
           className={selectClass}
           required
         >
-          <option value="">छान्नुहोस् (Select)</option>
+          <option value="">{getPlaceholder()}</option>
           {availableDistricts.map((d) => (
             <option key={d} value={d}>{d}</option>
           ))}
@@ -78,7 +90,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className={labelClass}>नगरपालिका / गाउँपालिका (Municipality)</label>
+        <label className={labelClass}>{getLabel('नगरपालिका / गाउँपालिका', 'Municipality')}</label>
         <select
           value={municipality}
           onChange={(e) => setMunicipality(e.target.value)}
@@ -86,7 +98,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
           className={selectClass}
           required
         >
-          <option value="">छान्नुहोस् (Select)</option>
+          <option value="">{getPlaceholder()}</option>
           {availableMunicipalities.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
@@ -94,7 +106,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
       </div>
 
       <div>
-        <label className={labelClass}>वडा नं. (Ward No.)</label>
+        <label className={labelClass}>{getLabel('वडा नं.', 'Ward No.')}</label>
         <select
           value={ward}
           onChange={(e) => setWard(e.target.value)}
@@ -102,7 +114,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
           className={selectClass}
           required
         >
-          <option value="">छान्नुहोस् (Select)</option>
+          <option value="">{getPlaceholder()}</option>
           {[...Array(32)].map((_, i) => (
             <option key={i + 1} value={(i + 1).toString()}>{i + 1}</option>
           ))}

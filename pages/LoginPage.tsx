@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FaPhone, FaLock, FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
@@ -9,6 +10,7 @@ const LoginPage: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,7 +18,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     if (phoneNumber.length < 10 && phoneNumber !== 'admin') {
-      setError('Please enter a valid 10-digit mobile number');
+      setError(t('कृपया मान्य १० अंकको मोबाइल नम्बर प्रविष्ट गर्नुहोस्', 'Please enter a valid 10-digit mobile number'));
       return;
     }
     setStep('otp');
@@ -34,7 +36,7 @@ const LoginPage: React.FC = () => {
           navigate(from);
       }
     } else {
-      setError('Invalid Credentials.');
+      setError(t('अमान्य विवरण।', 'Invalid Credentials.'));
     }
   };
 
@@ -43,12 +45,12 @@ const LoginPage: React.FC = () => {
       <div className="max-w-md w-full bg-white p-8 border border-slate-200 shadow-sm rounded-sm">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-slate-900">
-            {step === 'phone' ? ' लगइन (Login)' : 'ओटीपी प्रविष्ट गर्नुहोस् (Enter OTP)'}
+            {step === 'phone' ? t('लगइन', 'Login') : t('ओटीपी प्रविष्ट गर्नुहोस्', 'Enter OTP')}
           </h2>
           <p className="mt-2 text-sm text-slate-500 font-english">
             {step === 'phone' 
-              ? 'Secure access to Nagarik Aawaz portal.' 
-              : `Code sent to ${phoneNumber}`
+              ? t('नागरिक आवाज पोर्टलमा सुरक्षित पहुँच।', 'Secure access to Nagarik Aawaz portal.') 
+              : `${t('कोड पठाइयो', 'Code sent to')} ${phoneNumber}`
             }
           </p>
         </div>
@@ -62,7 +64,7 @@ const LoginPage: React.FC = () => {
         {step === 'phone' ? (
           <form className="space-y-6" onSubmit={handlePhoneSubmit}>
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-1">मोबाइल नम्बर (Mobile Number)</label>
+              <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-1">{t('मोबाइल नम्बर', 'Mobile Number')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaPhone className="h-4 w-4 text-slate-400" />
@@ -72,7 +74,7 @@ const LoginPage: React.FC = () => {
                   name="phone"
                   type="text"
                   required
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-english"
+                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
                   placeholder="98XXXXXXXX"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
@@ -82,9 +84,9 @@ const LoginPage: React.FC = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-slate-900 hover:bg-slate-800 focus:outline-none transition"
+                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition"
               >
-                ओटीपी पठाउनुहोस् (Send OTP)
+                {t('ओटीपी पठाउनुहोस्', 'Send OTP')}
                 <FaArrowRight className="ml-2 h-4 w-4" />
               </button>
             </div>
@@ -98,7 +100,7 @@ const LoginPage: React.FC = () => {
         ) : (
            <form className="space-y-6" onSubmit={handleOtpSubmit}>
             <div>
-              <label htmlFor="otp" className="block text-sm font-semibold text-slate-700 mb-1">ओटीपी कोड (OTP Code)</label>
+              <label htmlFor="otp" className="block text-sm font-semibold text-slate-700 mb-1">{t('ओटीपी कोड', 'OTP Code')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaLock className="h-4 w-4 text-slate-400" />
@@ -108,7 +110,7 @@ const LoginPage: React.FC = () => {
                   name="otp"
                   type="password"
                   required
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 tracking-widest text-center text-lg focus:ring-1 focus:ring-slate-900 focus:border-slate-900 font-english"
+                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 tracking-widest text-center text-lg focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
                   placeholder="------"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
@@ -124,13 +126,13 @@ const LoginPage: React.FC = () => {
                 onClick={() => setStep('phone')}
                 className="w-1/3 py-3 px-4 border border-slate-300 text-sm font-medium rounded-sm text-slate-700 bg-white hover:bg-slate-50 transition"
               >
-                फिर्ता (Back)
+                {t('फिर्ता', 'Back')}
               </button>
               <button
                 type="submit"
-                className="w-2/3 flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-slate-900 hover:bg-slate-800 focus:outline-none transition"
+                className="w-2/3 flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition"
               >
-                 प्रवेश गर्नुहोस् (Login)
+                 {t('प्रवेश गर्नुहोस्', 'Login')}
               </button>
             </div>
           </form>

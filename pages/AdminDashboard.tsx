@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { getPendingVerifications, processVerification, getConstituencies } from '../services/dataService';
 import { VerificationRequest, Constituency } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FaCheck, FaTimes, FaEye, FaSync, FaShieldAlt } from 'react-icons/fa';
 
 const AdminDashboard: React.FC = () => {
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
   const [activeTab, setActiveTab] = useState<'verifications' | 'constituencies'>('verifications');
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadData();
@@ -30,20 +32,20 @@ const AdminDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
             <h1 className="text-2xl font-bold text-slate-900 flex items-center">
                 <FaShieldAlt className="w-6 h-6 mr-3 text-slate-700" />
-                Admin Portal
+                {t('प्रशासक पोर्टल', 'Admin Portal')}
             </h1>
             <div className="bg-white rounded-sm p-1 shadow-sm border border-slate-200 flex">
                 <button 
                     onClick={() => setActiveTab('verifications')}
-                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'verifications' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'verifications' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
                 >
-                    Pending Verifications <span className="ml-2 bg-red-600 text-white px-1.5 rounded-sm text-xs">{verifications.length}</span>
+                    {t('प्रमाणीकरण अनुरोध', 'Pending Verifications')} <span className="ml-2 bg-red-600 text-white px-1.5 rounded-sm text-xs">{verifications.length}</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('constituencies')}
-                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'constituencies' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'constituencies' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
                 >
-                    Constituencies
+                    {t('निर्वाचन क्षेत्रहरू', 'Constituencies')}
                 </button>
             </div>
         </div>

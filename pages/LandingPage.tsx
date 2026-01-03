@@ -4,10 +4,12 @@ import AddressSelector from '../components/AddressSelector';
 import { detectConstituency, getConstituencies } from '../services/dataService';
 import { Constituency } from '../types';
 import { PROVINCES } from '../constants';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding } from 'react-icons/fa';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [detectedId, setDetectedId] = useState<string | null>(null);
@@ -51,25 +53,30 @@ const LandingPage: React.FC = () => {
   return (
     <div className="bg-slate-50">
       {/* Hero Section - Official Tone */}
-      <div className="bg-slate-900 text-white relative border-b border-slate-700">
-        <div className="absolute inset-0 bg-slate-800 opacity-50 pattern-grid-lg"></div>
+      <div className="bg-[#0094da] text-white relative border-b border-slate-700">
+        <div className="absolute inset-0 bg-[#0094da] opacity-50 pattern-grid-lg"></div>
         <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 text-center">
-          <div className="inline-block border border-slate-500 rounded-full px-4 py-1 mb-6 bg-slate-800/50 backdrop-blur-sm">
-             <span className="text-sm font-medium tracking-wide">नागरिक सहभागिता (Civic Participation)</span>
+          <div className="inline-block border border-[#ffffff] rounded-full px-4 py-1 mb-6 bg-slate-800 backdrop-blur-sm">
+             <span className="text-sm font-medium tracking-wide">
+               {t('नागरिक सहभागिता', 'Civic Participation')}
+             </span>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
-            लोकतान्त्रिक प्रक्रियामा <br/>
-            <span className="text-slate-200">तपाईंको सहभागिता</span>
+            {t('लोकतान्त्रिक प्रक्रियामा', 'In the Democratic Process')} <br/>
+            <span className="text-slate-800">{t('तपाईंको सहभागिता', 'Your Participation')}</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 font-english mb-8 max-w-2xl mx-auto">
-            (Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.)
+          <p className="text-lg md:text-xl text-[#ffffff] font-english mb-8 max-w-2xl mx-auto">
+            {t(
+              'लोकतन्त्रको सुरुवात तपाईंबाट हुन्छ। आफ्नो क्षेत्रमा सहभागी हुनुहोस्, उम्मेदवार छान्नुहोस् र जवाफदेहिता सुनिश्चित गर्नुहोस्।',
+              'Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.'
+            )}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <a href="#find-constituency" className="bg-white text-slate-900 px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-100 transition shadow-md border border-transparent">
-                मेरो क्षेत्र खोज्नुहोस् (Find My Area)
+             <a href="#find-constituency" className="bg-slate-800 text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-[#007bb8] transition shadow-md border border-transparent">
+                {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
              </a>
-             <Link to="/verify" className="bg-transparent border border-slate-400 text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-800 transition">
-                प्रमाणीकरण (Verify ID)
+             <Link to="/verify" className="bg-transparent border border-[#ffffff] text-white px-8 py-3 rounded-sm font-semibold text-lg hover:bg-slate-800 transition">
+                {t('प्रमाणीकरण', 'Verify Identity')}
              </Link>
           </div>
         </div>
@@ -79,33 +86,45 @@ const LandingPage: React.FC = () => {
       <div className="py-16 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-slate-900">प्रक्रिया (Process)</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t('प्रक्रिया', 'Process')}</h2>
             <p className="mt-2 text-slate-500 font-english">How Nagarik Aawaz works</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
-                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
+                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
                     <FaClipboardCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">१. पहिचान प्रमाणीकरण (Verify)</h3>
-                <p className="text-slate-600 text-sm">आफ्नो परिचय पत्र अपलोड गर्नुहोस् र आफ्नो निर्वाचन क्षेत्र यकिन गर्नुहोस्।</p>
-                <p className="text-slate-400 text-xs mt-2 font-english">(Upload ID and confirm your constituency.)</p>
+                <h3 className="text-lg font-bold mb-2">1. {t('पहिचान प्रमाणीकरण', 'Verify Identity')}</h3>
+                <p className="text-slate-600 text-sm">
+                  {t(
+                    'आफ्नो परिचय पत्र अपलोड गर्नुहोस् र आफ्नो निर्वाचन क्षेत्र यकिन गर्नुहोस्।',
+                    'Upload your ID document and confirm your constituency.'
+                  )}
+                </p>
             </div>
-            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
-                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
+                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
                     <FaVoteYea className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">२. उम्मेदवार चयन (Vote)</h3>
-                <p className="text-slate-600 text-sm">निर्वाचन पूर्व, योग्य उम्मेदवारको प्रस्ताव हेर्नुहोस् र मतदान गर्नुहोस्।</p>
-                <p className="text-slate-400 text-xs mt-2 font-english">(Review proposals and vote for candidates.)</p>
+                <h3 className="text-lg font-bold mb-2">2. {t('उम्मेदवार चयन', 'Vote')}</h3>
+                <p className="text-slate-600 text-sm">
+                  {t(
+                    'निर्वाचन पूर्व, योग्य उम्मेदवारको प्रस्ताव हेर्नुहोस् र मतदान गर्नुहोस्।',
+                    'Before elections, review candidate proposals and cast your vote.'
+                  )}
+                </p>
             </div>
-            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm">
-                <div className="w-12 h-12 bg-slate-200 text-slate-700 flex items-center justify-center mb-6 rounded-sm">
+            <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
+                <div className="w-12 h-12 bg-sky-50 text-[#0094da] flex items-center justify-center mb-6 rounded-sm">
                     <FaUsers className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">३. जवाफदेहिता (Accountability)</h3>
-                <p className="text-slate-600 text-sm">निर्वाचन पश्चात, समस्या दर्ता गर्नुहोस् र प्रतिनिधिको कामको निगरानी गर्नुहोस्।</p>
-                <p className="text-slate-400 text-xs mt-2 font-english">(Report issues and track representative progress.)</p>
+                <h3 className="text-lg font-bold mb-2">3. {t('जवाफदेहिता', 'Accountability')}</h3>
+                <p className="text-slate-600 text-sm">
+                  {t(
+                    'निर्वाचन पश्चात, समस्या दर्ता गर्नुहोस् र प्रतिनिधिको कामको निगरानी गर्नुहोस्।',
+                    'After elections, report local issues and track representative progress.'
+                  )}
+                </p>
             </div>
           </div>
         </div>
@@ -116,31 +135,32 @@ const LandingPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white border border-slate-300 p-8 shadow-sm rounded-sm">
             <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center border-b border-slate-100 pb-4">
-              <FaSearch className="w-5 h-5 mr-3 text-slate-500" />
-              आफ्नो निर्वाचन क्षेत्र पत्ता लगाउनुहोस् (Identify Constituency)
+              <FaSearch className="w-5 h-5 mr-3 text-[#0094da]" />
+              {t('आफ्नो निर्वाचन क्षेत्र पत्ता लगाउनुहोस्', 'Identify Your Constituency')}
             </h2>
-            <AddressSelector onAddressChange={setAddress} />
+            {/* Search is general UI, so isBilingual={false} uses the Toggle mode */}
+            <AddressSelector onAddressChange={setAddress} isBilingual={false} />
             <div className="mt-8 pt-4 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={handleFindConstituency}
-                className="w-full sm:w-auto bg-slate-900 text-white px-8 py-3 rounded-sm font-semibold hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full sm:w-auto bg-[#0094da] text-white px-8 py-3 rounded-sm font-semibold hover:bg-[#007bb8] transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 disabled={!address.ward}
               >
-                खोज्नुहोस् (Search)
+                {t('खोज्नुहोस्', 'Search')}
               </button>
             </div>
 
             {detectedId && (
               <div className="mt-6 p-6 bg-emerald-50 border border-emerald-200 text-center">
-                <p className="text-emerald-800 font-medium mb-2 text-sm">तपाईंको निर्वाचन क्षेत्र (Your Constituency)</p>
+                <p className="text-emerald-800 font-medium mb-2 text-sm">{t('तपाईंको निर्वाचन क्षेत्र', 'Your Constituency')}</p>
                 <h3 className="text-2xl font-bold text-slate-900 mb-4">
                   {constituencies.find(c => c.id === detectedId)?.name || detectedId}
                 </h3>
                 <button 
                    onClick={() => navigate(`/constituency/${detectedId}`)}
-                   className="inline-block bg-emerald-700 text-white px-6 py-2 rounded-sm font-medium hover:bg-emerald-800 text-sm transition"
+                   className="inline-block bg-[#0094da] text-white px-6 py-2 rounded-sm font-medium hover:bg-[#007bb8] text-sm transition"
                 >
-                  ड्यासबोर्डमा जानुहोस् (Go to Dashboard)
+                  {t('ड्यासबोर्डमा जानुहोस्', 'Go to Dashboard')}
                 </button>
               </div>
             )}
@@ -152,7 +172,7 @@ const LandingPage: React.FC = () => {
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-200 pb-4">
-            <h2 className="text-xl font-bold text-slate-900">निर्वाचन क्षेत्रहरू (Constituencies Directory)</h2>
+            <h2 className="text-xl font-bold text-slate-900">{t('निर्वाचन क्षेत्रहरू', 'Constituency Directory')}</h2>
             
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
                 <div className="relative">
@@ -161,19 +181,19 @@ const LandingPage: React.FC = () => {
                     </div>
                     <input 
                         type="text"
-                        placeholder="Search district..."
-                        className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 w-full text-sm font-english"
+                        placeholder={t('जिल्ला खोज्नुहोस्...', 'Search district...')}
+                        className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] w-full text-sm font-english"
                         value={searchTerm}
                         onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     />
                 </div>
                 
                 <select 
-                    className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 text-sm font-english bg-white"
+                    className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] text-sm font-english bg-white"
                     value={selectedProvince}
                     onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
                 >
-                    <option value="">सबै प्रदेश (All Provinces)</option>
+                    <option value="">{t('सबै प्रदेश', 'All Provinces')}</option>
                     {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
             </div>
@@ -181,14 +201,14 @@ const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {currentConstituencies.map((c) => (
-              <div key={c.id} className="bg-white border border-slate-200 hover:border-slate-400 transition p-5 group">
+              <div key={c.id} className="bg-white border border-slate-200 hover:border-[#0094da] transition p-5 group">
                 <div className="mb-3">
                   <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
                     {c.province.replace('Province', '')}
                   </span>
                   <div className="text-xs text-slate-400 font-english">{c.district}</div>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-blue-900 transition">{c.name}</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-[#0094da] transition">{c.name}</h3>
                 <div className="flex items-center space-x-3 pt-3 border-t border-slate-100">
                    {c.mp_image ? (
                       <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 grayscale group-hover:grayscale-0 transition object-cover rounded-sm" />
@@ -198,13 +218,13 @@ const LandingPage: React.FC = () => {
                       </div>
                    )}
                    <div className="text-xs">
-                      <p className="text-slate-500">प्रतिनिधि (Rep)</p>
-                      <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || "पद रिक्त (Vacant)"}</p>
+                      <p className="text-slate-500">{t('प्रतिनिधि', 'Representative')}</p>
+                      <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || t("पद रिक्त", "Vacant")}</p>
                    </div>
                 </div>
                 <div className="mt-4">
-                  <Link to={`/constituency/${c.id}`} className="text-xs font-bold text-slate-900 hover:underline uppercase tracking-wide">
-                    विवरण हेर्नुहोस् (View) &rarr;
+                  <Link to={`/constituency/${c.id}`} className="text-xs font-bold text-[#0094da] hover:underline uppercase tracking-wide">
+                    {t('विवरण हेर्नुहोस्', 'View Details')} &rarr;
                   </Link>
                 </div>
               </div>
@@ -235,7 +255,7 @@ const LandingPage: React.FC = () => {
                             onClick={() => goToPage(pageNum)}
                             className={`w-8 h-8 text-sm font-medium transition rounded-sm ${
                                 currentPage === pageNum 
-                                ? 'bg-slate-900 text-white border border-slate-900' 
+                                ? 'bg-[#0094da] text-white border border-[#0094da]' 
                                 : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                             }`}
                         >
