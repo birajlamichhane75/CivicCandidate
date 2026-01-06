@@ -68,7 +68,7 @@ const LandingPage: React.FC = () => {
 
           {/* App Name Heading */}
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 leading-tight">
-            {t('नागरिकको उम्मेदवार', 'Citizen’s Candidate')}
+            {t('नागरिक उम्मेदवार', 'Civic Candidate')}
           </h1>
 
           {/* Tagline / Short Description */}
@@ -123,7 +123,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-slate-900">{t('प्रक्रिया', 'Process')}</h2>
-            <p className="mt-2 text-slate-500 font-english">How Citizen’s Candidate works</p>
+            <p className="mt-2 text-slate-500 font-english">How Civic Candidate works</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-slate-50 p-8 border border-slate-200 rounded-sm hover:border-[#0094da] transition duration-300">
