@@ -106,14 +106,24 @@ const LandingPage: React.FC = () => {
             </a>
 
 
-            <Link
-              to="/verify"
-              className="bg-white/10 border border-white/40 text-white 
-                        px-8 py-3 rounded-sm font-semibold text-lg 
-                        hover:bg-white/20 transition"
+            <a
+              href="https://www.youtube.com/watch?v=H7PXlQmblqc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+    bg-red-600
+    border border-red-400
+    text-white
+    px-8 py-3
+    rounded-sm
+    font-semibold text-lg
+    hover:bg-red-500
+    transition
+  "
             >
-              {t('प्रमाणीकरण', 'Verify Identity')}
-            </Link>
+              ▶ {t('डेमो हेर्नुहोस्', 'View Demo')}
+            </a>
+
           </div>
         </div>
       </div>
@@ -290,8 +300,8 @@ const LandingPage: React.FC = () => {
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
                     className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
-                        ? 'bg-[#0094da] text-white border border-[#0094da]'
-                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      ? 'bg-[#0094da] text-white border border-[#0094da]'
+                      : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                       }`}
                   >
                     {pageNum}
