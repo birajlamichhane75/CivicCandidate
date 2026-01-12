@@ -1,13 +1,16 @@
+
 import React, { useEffect, useState } from 'react';
-import { getPendingVerifications, processVerification, getConstituencies } from '../services/dataService';
-import { VerificationRequest, Constituency } from '../types';
+import { getPendingVerifications, processVerification, getConstituencies, getPendingCandidates, processCandidateApplication } from '../services/dataService';
+import { VerificationRequest, Constituency, Candidate } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FaCheck, FaTimes, FaEye, FaSync, FaShieldAlt } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaEye, FaSync, FaShieldAlt, FaUserTie, FaBuilding, FaIdCard } from 'react-icons/fa';
 
 const AdminDashboard: React.FC = () => {
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
+  const [pendingCandidates, setPendingCandidates] = useState<Candidate[]>([]);
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
-  const [activeTab, setActiveTab] = useState<'verifications' | 'constituencies'>('verifications');
+  
+  const [activeTab, setActiveTab] = useState<'verifications' | 'candidates' | 'constituencies'>('verifications');
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -16,14 +19,22 @@ const AdminDashboard: React.FC = () => {
 
   const loadData = () => {
     getPendingVerifications().then(setVerifications);
+    getPendingCandidates().then(setPendingCandidates);
     getConstituencies().then(setConstituencies);
   };
 
   const handleVerification = async (id: string, approve: boolean) => {
-    if(window.confirm(`Confirm Action?`)) {
+    if(window.confirm(`Confirm Verification Action?`)) {
         await processVerification(id, approve);
         loadData();
     }
+  };
+
+  const handleCandidateApproval = async (id: string, approve: boolean) => {
+      if(window.confirm(`Confirm Candidate ${approve ? 'Approval' : 'Rejection'}?`)) {
+          await processCandidateApplication(id, approve);
+          loadData();
+      }
   };
 
   return (
@@ -34,18 +45,24 @@ const AdminDashboard: React.FC = () => {
                 <FaShieldAlt className="w-6 h-6 mr-3 text-slate-700" />
                 {t('प्रशासक पोर्टल', 'Admin Portal')}
             </h1>
-            <div className="bg-white rounded-sm p-1 shadow-sm border border-slate-200 flex">
+            <div className="bg-white rounded-sm p-1 shadow-sm border border-slate-200 flex flex-wrap gap-1">
                 <button 
                     onClick={() => setActiveTab('verifications')}
-                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'verifications' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition flex items-center ${activeTab === 'verifications' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
                 >
-                    {t('प्रमाणीकरण अनुरोध', 'Pending Verifications')} <span className="ml-2 bg-red-600 text-white px-1.5 rounded-sm text-xs">{verifications.length}</span>
+                    <FaIdCard className="mr-2"/> ID Requests <span className="ml-2 bg-red-600 text-white px-1.5 rounded-sm text-xs">{verifications.length}</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('candidates')}
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition flex items-center ${activeTab === 'candidates' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                    <FaUserTie className="mr-2"/> Candidates <span className="ml-2 bg-red-600 text-white px-1.5 rounded-sm text-xs">{pendingCandidates.length}</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('constituencies')}
-                    className={`px-4 py-2 rounded-sm text-sm font-medium transition ${activeTab === 'constituencies' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition flex items-center ${activeTab === 'constituencies' ? 'bg-[#0094da] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
                 >
-                    {t('निर्वाचन क्षेत्रहरू', 'Constituencies')}
+                    <FaBuilding className="mr-2"/> Constituencies
                 </button>
             </div>
         </div>
@@ -53,7 +70,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'verifications' && (
             <div className="bg-white rounded-sm shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                    <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Verification Queue</h2>
+                    <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">ID Verification Queue</h2>
                     <button onClick={loadData} className="text-slate-500 hover:text-slate-800"><FaSync className="w-4 h-4" /></button>
                 </div>
                 <div className="overflow-x-auto">
@@ -96,6 +113,67 @@ const AdminDashboard: React.FC = () => {
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
                                         Queue Empty. No pending verifications.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )}
+
+        {activeTab === 'candidates' && (
+            <div className="bg-white rounded-sm shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Candidate Approval Queue</h2>
+                    <button onClick={loadData} className="text-slate-500 hover:text-slate-800"><FaSync className="w-4 h-4" /></button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-200">
+                        <thead className="bg-slate-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Candidate</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Affiliation</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Details</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-200">
+                            {pendingCandidates.map((cand) => (
+                                <tr key={cand.id} className="hover:bg-slate-50">
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm font-bold text-slate-900">{cand.name}</div>
+                                        <div className="text-xs text-slate-500">Const: {cand.constituency_id}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-slate-900">{cand.party_affiliation}</div>
+                                        {cand.election_commission_filed ? 
+                                            <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 rounded-sm border border-blue-200">EC Filed</span> : 
+                                            <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 rounded-sm border border-amber-200">Not Filed</span>
+                                        }
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                        <p className="font-semibold text-xs mb-1">Background:</p>
+                                        <p className="line-clamp-2 text-xs mb-2">{cand.background}</p>
+                                        <p className="font-semibold text-xs mb-1">Proposals ({cand.proposals.length}):</p>
+                                        <ul className="list-disc list-inside text-xs">
+                                            {cand.proposals.slice(0, 2).map((p, i) => <li key={i}>{p.title}</li>)}
+                                        </ul>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 align-top">
+                                        <button onClick={() => handleCandidateApproval(cand.id, true)} className="bg-emerald-600 text-white px-3 py-1 rounded-sm hover:bg-emerald-700 text-xs shadow-sm">
+                                            <FaCheck className="w-3 h-3 inline mr-1" /> Approve
+                                        </button>
+                                        <button onClick={() => handleCandidateApproval(cand.id, false)} className="bg-red-600 text-white px-3 py-1 rounded-sm hover:bg-red-700 text-xs shadow-sm">
+                                            <FaTimes className="w-3 h-3 inline mr-1" /> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {pendingCandidates.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
+                                        No pending candidate applications.
                                     </td>
                                 </tr>
                             )}

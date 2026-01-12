@@ -1,5 +1,7 @@
+
 export type UserRole = 'citizen' | 'candidate' | 'mp' | 'admin';
 export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'unverified';
+export type CandidateStatus = 'pending' | 'approved' | 'rejected';
 
 export interface User {
   id: string;
@@ -25,15 +27,23 @@ export interface Constituency {
   mp_name?: string;
 }
 
+export interface Proposal {
+  title: string;
+  description: string;
+}
+
 export interface Candidate {
   id: string;
   user_id: string;
   name: string;
   constituency_id: string;
-  proposals: string[];
+  proposals: Proposal[];
   qualification: string;
   background: string;
   vote_count: number;
+  status: CandidateStatus;
+  election_commission_filed: boolean;
+  party_affiliation: string;
 }
 
 export interface Issue {

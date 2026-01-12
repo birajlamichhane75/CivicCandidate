@@ -1,3 +1,4 @@
+
 import { supabase } from './supabaseClient';
 import { Constituency, Candidate, Issue, VerificationRequest, User } from '../types';
 import { MOCK_CONSTITUENCIES } from '../constants';
@@ -82,11 +83,23 @@ export const detectConstituency = async (province: string, district: string, mun
 
 // --- Candidates ---
 export const getCandidates = async (constituencyId: string): Promise<Candidate[]> => {
+  // Only return APPROVED candidates for public view
   const { data, error } = await supabase
     .from('candidates')
     .select('*')
     .eq('constituency_id', constituencyId)
+    .eq('status', 'approved')
     .order('vote_count', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const getPendingCandidates = async (): Promise<Candidate[]> => {
+  const { data, error } = await supabase
+    .from('candidates')
+    .select('*')
+    .eq('status', 'pending');
 
   if (error) throw error;
   return data || [];
@@ -131,15 +144,31 @@ export const hasVoted = async (voterPhone: string): Promise<boolean> => {
   return !!data;
 };
 
-export const registerCandidate = async (candidateData: Omit<Candidate, 'id' | 'vote_count'>): Promise<Candidate> => {
+export const registerCandidate = async (candidateData: Omit<Candidate, 'id' | 'vote_count' | 'status'>): Promise<Candidate> => {
+  // New candidates are always 'pending'
   const { data, error } = await supabase
     .from('candidates')
-    .insert([{ ...candidateData, vote_count: 0 }])
+    .insert([{ 
+        ...candidateData, 
+        vote_count: 0,
+        status: 'pending'
+    }])
     .select()
     .single();
 
   if (error) throw error;
   return data;
+};
+
+export const processCandidateApplication = async (candidateId: string, approved: boolean): Promise<void> => {
+  const status = approved ? 'approved' : 'rejected';
+  
+  const { error } = await supabase
+    .from('candidates')
+    .update({ status })
+    .eq('id', candidateId);
+
+  if (error) throw error;
 };
 
 // --- Issues ---
