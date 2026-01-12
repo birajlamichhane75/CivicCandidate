@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { registerCandidate } from '../services/dataService';
-import { FaPlus, FaTrash, FaUserEdit, FaInfoCircle } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaUserEdit, FaInfoCircle, FaCheckCircle, FaClock, FaCalendarAlt } from 'react-icons/fa';
 import { Proposal } from '../types';
 
 const PARTIES = [
@@ -38,6 +38,8 @@ const CandidateApplyPage: React.FC = () => {
   ]); 
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [decisionDates, setDecisionDates] = useState<{ ad: string, bs: string } | null>(null);
 
   const handleProposalChange = (index: number, field: keyof Proposal, value: string) => {
     const newProposals = [...proposals];
@@ -53,6 +55,27 @@ const CandidateApplyPage: React.FC = () => {
     if (proposals.length <= 5) return;
     const newProposals = proposals.filter((_, i) => i !== index);
     setProposals(newProposals);
+  };
+
+  const calculateDecisionTime = () => {
+    const now = new Date();
+    const target = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +24 hours
+
+    // English Date (AD)
+    const adDate = target.toLocaleString('en-US', { 
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
+
+    // Approximation for BS (AD + ~56y 8m 17d) - Visual estimation only for this environment
+    // In a real app, use 'bikram-sambat-js'
+    const bsYear = target.getFullYear() + 57;
+    // Mapping months roughly
+    const bsMonths = ["Baisakh", "Jestha", "Ashad", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"];
+    const bsMonthIndex = (target.getMonth() + 8) % 12; 
+    const bsDay = target.getDate(); // Keeping day same for approximation simplicity
+    const bsDateStr = `${bsYear} ${bsMonths[bsMonthIndex]} ${bsDay}, ${target.toLocaleTimeString()}`;
+
+    return { ad: adDate, bs: bsDateStr };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,8 +110,11 @@ const CandidateApplyPage: React.FC = () => {
             election_commission_filed: ecFiled === 'yes'
         });
         
-        alert("Candidate application submitted successfully! It is now PENDING ADMIN APPROVAL. You will be listed once approved.");
-        navigate(`/constituency/${id}`);
+        // Calculate dates and show success view
+        setDecisionDates(calculateDecisionTime());
+        setIsSuccess(true);
+        setIsSubmitting(false);
+        
     } catch (err) {
         console.error(err);
         alert("Failed to submit application.");
@@ -98,6 +124,53 @@ const CandidateApplyPage: React.FC = () => {
 
   const inputClass = "mt-1 block w-full border border-slate-300 rounded-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] sm:text-sm";
   const labelClass = "block text-sm font-semibold text-slate-700";
+
+  if (isSuccess && decisionDates) {
+      return (
+          <div className="max-w-2xl mx-auto px-4 py-16">
+              <div className="bg-white rounded-sm border-t-4 border-[#0094da] shadow-lg p-10 text-center">
+                  <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-sky-50 mb-6">
+                      <FaClock className="h-10 w-10 text-[#0094da]" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-slate-900 mb-4">Application Submitted</h2>
+                  <p className="text-xl text-slate-600 mb-8 font-medium">
+                      तपाईंको उम्मेदवारी पर्खाइमा छ। <br/>
+                      <span className="text-sm text-slate-500 mt-2 block">(Your candidacy is pending.)</span>
+                  </p>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-sm p-6 mb-8 text-left">
+                      <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">
+                          Estimated Decision Time (२४ घण्टा भित्र)
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="flex items-start space-x-3">
+                              <FaCalendarAlt className="w-5 h-5 text-[#0094da] mt-1" />
+                              <div>
+                                  <p className="text-xs text-slate-400 font-bold uppercase">Bikram Sambat (BS)</p>
+                                  <p className="text-lg font-bold text-slate-800">{decisionDates.bs}</p>
+                              </div>
+                          </div>
+                          <div className="flex items-start space-x-3">
+                              <FaCalendarAlt className="w-5 h-5 text-slate-400 mt-1" />
+                              <div>
+                                  <p className="text-xs text-slate-400 font-bold uppercase">English Date (AD)</p>
+                                  <p className="text-lg font-bold text-slate-800 font-english">{decisionDates.ad}</p>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <button 
+                    onClick={() => navigate(`/constituency/${id}`)}
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-sm shadow-sm text-white bg-[#0094da] hover:bg-[#007bb8] transition"
+                  >
+                      ड्यासबोर्डमा फर्कनुहोस् (Return to Dashboard)
+                  </button>
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
