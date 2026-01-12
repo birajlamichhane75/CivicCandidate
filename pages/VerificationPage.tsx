@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
-import { submitVerification, detectConstituency } from '../services/dataService';
+import { submitVerification, detectConstituency, uploadIdDocument } from '../services/dataService';
 import { useAuth } from '../services/authService';
 import { FaCloudUploadAlt, FaCheckCircle, FaIdCard, FaShieldAlt } from 'react-icons/fa';
 
@@ -9,13 +9,38 @@ const VerificationPage: React.FC = () => {
   const { user, updateUserVerification } = useAuth();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
+  // Cleanup preview URL on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+
+      // Validate File Size (Max 5MB)
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        alert("File size exceeds 5MB limit. Please upload a smaller image.");
+        return;
+      }
+
+      // Validate File Type
+      if (!selectedFile.type.startsWith('image/')) {
+        alert("Please upload a valid image file (JPG, PNG).");
+        return;
+      }
+
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -24,10 +49,15 @@ const VerificationPage: React.FC = () => {
     if (!user || !file || !address.ward || !isConfirmed) return;
 
     setIsSubmitting(true);
-    setTimeout(async () => {
+    
+    try {
+        // 1. Upload Image to Supabase Storage
+        const uploadedImageUrl = await uploadIdDocument(file, user.id);
+        
+        // 2. Detect Constituency
         const constituencyId = await detectConstituency(address.province, address.district, address.municipality, address.ward);
-        const fakeImageUrl = `https://via.placeholder.com/400x300?text=ID+Card+${user.phone_number}`;
 
+        // 3. Submit Verification Request
         await submitVerification({
             user_id: user.id,
             phone_number: user.phone_number,
@@ -35,12 +65,17 @@ const VerificationPage: React.FC = () => {
             district: address.district,
             municipality: address.municipality,
             ward: address.ward,
-            id_image_url: fakeImageUrl, 
+            id_image_url: uploadedImageUrl, 
         });
 
+        // 4. Update Local State
         updateUserVerification('pending', constituencyId);
         navigate('/verification-status');
-    }, 1500);
+    } catch (error: any) {
+        console.error("Verification submission failed:", error);
+        alert(error.message || "Failed to submit verification. Please try again.");
+        setIsSubmitting(false);
+    }
   };
 
   const isFormFilled = file && address.ward;
@@ -67,12 +102,29 @@ const VerificationPage: React.FC = () => {
               परिचय पत्र (Identity Document)
             </h3>
             <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-sm bg-white hover:bg-slate-50 transition">
-              <div className="space-y-2 text-center">
-                {file ? (
+              <div className="space-y-2 text-center w-full">
+                {file && previewUrl ? (
                    <div className="flex flex-col items-center">
-                       <FaCheckCircle className="h-10 w-10 text-emerald-600 mb-2" />
+                       <div className="relative mb-3">
+                           <img 
+                            src={previewUrl} 
+                            alt="ID Preview" 
+                            className="max-h-64 object-contain rounded-md border border-slate-200 shadow-sm"
+                           />
+                           <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md">
+                               <FaCheckCircle className="h-6 w-6 text-emerald-600" />
+                           </div>
+                       </div>
                        <p className="text-sm text-slate-900 font-medium font-english">{file.name}</p>
-                       <button type="button" onClick={() => setFile(null)} className="text-xs text-red-600 hover:text-red-800 mt-2 font-english uppercase tracking-wider font-semibold">Remove & Change</button>
+                       <p className="text-xs text-slate-500 font-english">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                       
+                       <label
+                            htmlFor="file-upload"
+                            className="mt-3 cursor-pointer text-xs font-bold text-[#0094da] hover:text-[#007bb8] uppercase tracking-wider border border-[#0094da] px-4 py-2 rounded-sm"
+                        >
+                            Change Image
+                            <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                        </label>
                    </div>
                 ) : (
                     <>
@@ -155,7 +207,7 @@ const VerificationPage: React.FC = () => {
               disabled={isSubmitting || !isFormFilled || !isConfirmed}
               className="w-full flex justify-center py-4 px-4 border border-transparent rounded-sm shadow-sm text-base font-bold text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed transition"
             >
-              {isSubmitting ? 'प्रक्रियामा छ... (Submitting...)' : 'पेश गर्नुहोस् (Submit for Verification)'}
+              {isSubmitting ? 'अपलोड गर्दै... (Uploading...)' : 'पेश गर्नुहोस् (Submit for Verification)'}
             </button>
           </div>
         </form>

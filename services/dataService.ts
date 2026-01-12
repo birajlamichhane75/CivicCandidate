@@ -2,6 +2,38 @@ import { supabase } from './supabaseClient';
 import { Constituency, Candidate, Issue, VerificationRequest, User } from '../types';
 import { MOCK_CONSTITUENCIES } from '../constants';
 
+// --- Storage ---
+export const uploadIdDocument = async (file: File, userId: string): Promise<string> => {
+  // 1. Construct path: userId/timestamp_filename
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  // 2. Upload to 'id-verifications' bucket
+  const { error: uploadError } = await supabase.storage
+    .from('id-verifications')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (uploadError) {
+    console.error('Upload Error:', uploadError);
+    throw new Error(`Failed to upload ID document: ${uploadError.message}`);
+  }
+
+  // 3. Generate Signed URL (Valid for 1 year to ensure Admin can see it easily without complex logic)
+  const { data, error: urlError } = await supabase.storage
+    .from('id-verifications')
+    .createSignedUrl(filePath, 31536000); // 1 year expiry
+
+  if (urlError || !data?.signedUrl) {
+    throw new Error('Failed to generate document URL.');
+  }
+
+  return data.signedUrl;
+};
+
 // --- Constituencies ---
 export const getConstituencies = async (): Promise<Constituency[]> => {
   const { data, error } = await supabase
@@ -9,7 +41,7 @@ export const getConstituencies = async (): Promise<Constituency[]> => {
     .select('*');
   
   if (error || !data || data.length === 0) {
-    // If DB is empty or fails, return the full static list from constants
+    // If DB is empty or fails, return the restricted list from constants
     return MOCK_CONSTITUENCIES; 
   }
   return data;
@@ -25,26 +57,27 @@ export const getConstituencyById = async (id: string): Promise<Constituency | un
     
   if (data) return data;
 
-  // Fallback to static list
+  // Fallback to restricted list
   return MOCK_CONSTITUENCIES.find(c => c.id === id);
 };
 
 export const detectConstituency = async (province: string, district: string, municipality: string, ward: string): Promise<string> => {
-  // 1. Try to find a constituency in the static list that belongs to this district.
-  // We default to the FIRST constituency of the district to ensure a valid ID is returned.
-  // e.g. "Jhapa" -> "jhapa-1"
+  // Logic for the Limited Version (Bhaktapur 1, Bara 3, Kathmandu 7)
   
-  const match = MOCK_CONSTITUENCIES.find(c => 
-    c.district.toLowerCase() === district.toLowerCase() && 
-    c.province.toLowerCase() === province.toLowerCase()
-  );
+  if (district === 'Bhaktapur') {
+      return 'bhaktapur-1';
+  }
 
-  if (match) {
-      return match.id;
+  if (district === 'Bara') {
+      return 'bara-3';
+  }
+
+  if (district === 'Kathmandu') {
+      return 'kathmandu-7';
   }
   
-  // Final fallback
-  return 'kathmandu-1';
+  // Final fallback (Safe default for this version)
+  return 'bhaktapur-1';
 };
 
 // --- Candidates ---

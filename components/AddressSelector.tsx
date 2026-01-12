@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PROVINCES, DISTRICTS, MUNICIPALITIES } from '../constants';
+import { PROVINCES, DISTRICTS, MUNICIPALITIES, WARDS } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface AddressSelectorProps {
@@ -26,7 +26,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
 
   useEffect(() => {
      if (district) {
-         if (municipality && !(MUNICIPALITIES[district] || MUNICIPALITIES['Default']).includes(municipality)) {
+         if (municipality && !(MUNICIPALITIES[district] || []).includes(municipality)) {
              setMunicipality('');
              setWard('');
          }
@@ -36,13 +36,21 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
      }
   }, [district, municipality]);
 
+  useEffect(() => {
+    // Reset ward if not in available list
+    const validWards = municipality ? (WARDS[municipality] || []) : [];
+    if (ward && !validWards.includes(ward)) {
+        setWard('');
+    }
+  }, [municipality, ward]);
 
   useEffect(() => {
     onAddressChange({ province, district, municipality, ward });
   }, [province, district, municipality, ward, onAddressChange]);
 
   const availableDistricts = province ? DISTRICTS[province] || [] : [];
-  const availableMunicipalities = district ? (MUNICIPALITIES[district] || MUNICIPALITIES['Default']) : [];
+  const availableMunicipalities = district ? (MUNICIPALITIES[district] || []) : [];
+  const availableWards = municipality ? (WARDS[municipality] || []) : [];
 
   const selectClass = "w-full bg-white border border-slate-300 rounded-sm p-3 text-slate-800 focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english disabled:bg-slate-100 disabled:text-slate-400";
   const labelClass = "block text-sm font-semibold text-slate-700 mb-1";
@@ -115,8 +123,8 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddressChange, init
           required
         >
           <option value="">{getPlaceholder()}</option>
-          {[...Array(32)].map((_, i) => (
-            <option key={i + 1} value={(i + 1).toString()}>{i + 1}</option>
+          {availableWards.map((w) => (
+            <option key={w} value={w}>{w}</option>
           ))}
         </select>
       </div>
