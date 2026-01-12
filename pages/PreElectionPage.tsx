@@ -5,7 +5,7 @@ import { getCandidates, voteForCandidate, hasVoted } from '../services/dataServi
 import { useAuth } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Candidate, Proposal } from '../types';
-import { FaUserTie, FaCheckDouble, FaScroll, FaChevronLeft, FaUniversity, FaFlag, FaStamp, FaTimes, FaCheckCircle, FaExclamationCircle, FaListAlt } from 'react-icons/fa';
+import { FaUserTie, FaCheckDouble, FaScroll, FaChevronLeft, FaUniversity, FaFlag, FaStamp, FaTimes, FaCheckCircle, FaExclamationCircle, FaListAlt, FaVoteYea } from 'react-icons/fa';
 
 const PreElectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +18,7 @@ const PreElectionPage: React.FC = () => {
   // Modal State
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const [viewAllCandidate, setViewAllCandidate] = useState<Candidate | null>(null);
+  const [candidateToVote, setCandidateToVote] = useState<Candidate | null>(null);
 
   useEffect(() => {
     if (id && user) {
@@ -38,18 +39,24 @@ const PreElectionPage: React.FC = () => {
     setLoading(false);
   };
 
-  const handleVote = async (candidateId: string) => {
-    if (!user || !window.confirm('Are you sure you want to vote for this candidate? This action is irreversible.\n(के तपाइँ यस उम्मेदवारलाई भोट गर्न निश्चित हुनुहुन्छ? यो कार्य अपरिवर्तनीय छ।)')) return;
+  const initiateVote = (candidate: Candidate) => {
+      setCandidateToVote(candidate);
+  };
+
+  const confirmVote = async () => {
+    if (!user || !candidateToVote) return;
     
     try {
-        await voteForCandidate(candidateId, user.phone_number);
+        await voteForCandidate(candidateToVote.id, user.phone_number);
         setUserHasVoted(true);
+        setCandidateToVote(null); // Close Modal
         if (id) {
             const cands = await getCandidates(id);
             setCandidates(cands);
         }
     } catch (error) {
-        alert('Failed.');
+        alert('Failed to cast vote.');
+        setCandidateToVote(null);
     }
   };
 
@@ -58,6 +65,38 @@ const PreElectionPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
       
+      {/* Voting Confirmation Modal */}
+      {candidateToVote && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 p-4 backdrop-blur-sm">
+             <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6 relative animate-fade-in-up border-t-4 border-[#0094da] text-center">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-sky-50 mb-4">
+                    <FaVoteYea className="h-8 w-8 text-[#0094da]" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Confirm Vote</h3>
+                <p className="text-slate-600 text-sm mb-6">
+                    के तपाइँ <strong>{candidateToVote.name}</strong> लाई भोट गर्न निश्चित हुनुहुन्छ? यो कार्य अपरिवर्तनीय छ।
+                    <br/>
+                    <span className="text-xs text-slate-500 mt-2 block">(Are you sure you want to vote for this candidate? This action is irreversible.)</span>
+                </p>
+                
+                <div className="flex gap-3">
+                    <button 
+                        onClick={() => setCandidateToVote(null)}
+                        className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-sm hover:bg-slate-50 font-medium text-sm transition"
+                    >
+                        रद्द (Cancel)
+                    </button>
+                    <button 
+                        onClick={confirmVote}
+                        className="flex-1 px-4 py-2 bg-[#0094da] text-white rounded-sm hover:bg-[#007bb8] font-bold text-sm shadow-sm transition"
+                    >
+                        निश्चित गर्नुहोस् (Confirm)
+                    </button>
+                </div>
+             </div>
+        </div>
+      )}
+
       {/* Single Proposal Modal */}
       {selectedProposal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 backdrop-blur-sm">
@@ -189,7 +228,7 @@ const PreElectionPage: React.FC = () => {
                                         <div className="text-[10px] text-slate-400 uppercase tracking-wider font-english">Votes</div>
                                     </div>
                                     <button
-                                        onClick={() => handleVote(candidate.id)}
+                                        onClick={() => initiateVote(candidate)}
                                         disabled={userHasVoted}
                                         className={`mt-4 w-full px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wide transition border shadow-sm ${
                                             userHasVoted 

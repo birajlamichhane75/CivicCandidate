@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { submitVerification, detectConstituency, uploadIdDocument } from '../services/dataService';
 import { useAuth } from '../services/authService';
-import { FaCloudUploadAlt, FaCheckCircle, FaIdCard, FaShieldAlt } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaCheckCircle, FaIdCard, FaShieldAlt, FaClock, FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
 
 const VerificationPage: React.FC = () => {
   const { user, updateUserVerification } = useAuth();
@@ -13,6 +14,10 @@ const VerificationPage: React.FC = () => {
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  
+  // Success State
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [decisionDates, setDecisionDates] = useState<{ ad: string, bs: string, time: string } | null>(null);
 
   // Cleanup preview URL on unmount to prevent memory leaks
   useEffect(() => {
@@ -44,6 +49,32 @@ const VerificationPage: React.FC = () => {
     }
   };
 
+  const calculateDecisionTime = () => {
+    const now = new Date();
+    const target = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +24 hours
+
+    // Format Time (e.g., "2 PM")
+    let hours = target.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; 
+    const timeString = `${hours} ${ampm}`;
+
+    // English Date (AD)
+    const adDate = target.toLocaleDateString('en-US', { 
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Approximation for BS (AD + ~57 years)
+    const bsYear = target.getFullYear() + 57;
+    const bsMonths = ["Baisakh", "Jestha", "Ashad", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"];
+    const bsMonthIndex = (target.getMonth() + 8) % 12; 
+    const bsDay = target.getDate(); 
+    const bsDateStr = `${bsYear} ${bsMonths[bsMonthIndex]} ${bsDay}`;
+
+    return { ad: adDate, bs: bsDateStr, time: timeString };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !file || !address.ward || !isConfirmed) return;
@@ -70,7 +101,12 @@ const VerificationPage: React.FC = () => {
 
         // 4. Update Local State
         updateUserVerification('pending', constituencyId);
-        navigate('/verification-status');
+        
+        // 5. Show Success View
+        setDecisionDates(calculateDecisionTime());
+        setIsSuccess(true);
+        setIsSubmitting(false);
+
     } catch (error: any) {
         console.error("Verification submission failed:", error);
         alert(error.message || "Failed to submit verification. Please try again.");
@@ -79,6 +115,53 @@ const VerificationPage: React.FC = () => {
   };
 
   const isFormFilled = file && address.ward;
+
+  if (isSuccess && decisionDates) {
+    return (
+        <div className="max-w-2xl mx-auto px-4 py-16">
+            <div className="bg-white rounded-sm border-t-4 border-[#0094da] shadow-lg p-10 text-center">
+                <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-amber-50 mb-6">
+                    <FaClock className="h-10 w-10 text-amber-500" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">Verification Pending</h2>
+                <p className="text-xl text-slate-600 mb-8 font-medium">
+                    तपाईंको प्रमाणिकरण पर्खाइमा छ। <br/>
+                    <span className="text-sm text-slate-500 mt-2 block">(Your verification is pending.)</span>
+                </p>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-sm p-6 mb-8 text-left">
+                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">
+                        Estimated Decision Time: {decisionDates.time} (२४ घण्टा भित्र)
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-start space-x-3">
+                            <FaCalendarAlt className="w-5 h-5 text-[#0094da] mt-1" />
+                            <div>
+                                <p className="text-xs text-slate-400 font-bold uppercase">Bikram Sambat (BS)</p>
+                                <p className="text-lg font-bold text-slate-800">{decisionDates.bs}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                            <FaCalendarAlt className="w-5 h-5 text-slate-400 mt-1" />
+                            <div>
+                                <p className="text-xs text-slate-400 font-bold uppercase">English Date (AD)</p>
+                                <p className="text-lg font-bold text-slate-800 font-english">{decisionDates.ad}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button 
+                  onClick={() => navigate('/verification-status')}
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-sm shadow-sm text-white bg-[#0094da] hover:bg-[#007bb8] transition"
+                >
+                    स्थिति जाँच गर्नुहोस् (Check Status) <FaArrowRight className="ml-2"/>
+                </button>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
