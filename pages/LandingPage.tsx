@@ -1,18 +1,22 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { detectConstituency, getConstituencies } from '../services/dataService';
+import { useAuth } from '../services/authService';
 import { Constituency } from '../types';
 import { PROVINCES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding } from 'react-icons/fa';
+import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding, FaCheckCircle, FaArrowRight, FaPlayCircle, FaTimes } from 'react-icons/fa';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
   const [address, setAddress] = useState({ province: '', district: '', municipality: '', ward: '' });
   const [detectedId, setDetectedId] = useState<string | null>(null);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   // Pagination & Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,7 +55,31 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-slate-50 relative">
+      {/* Demo Video Modal */}
+      {showDemoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-5xl bg-black rounded-lg shadow-2xl overflow-hidden ring-1 ring-white/20">
+            <div className="aspect-video">
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src="https://www.youtube.com/embed/H7PXlQmblqc?autoplay=1&rel=0"
+                title="Civic Candidate Demo"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <button
+              onClick={() => setShowDemoModal(false)}
+              className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition shadow-lg z-10 group"
+            >
+              <FaTimes className="w-5 h-5 group-hover:rotate-90 transition duration-300" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section - Official Tone */}
       <div className="bg-[#0094da] text-white relative border-b border-white/20">
         {/* pattern overlay */}
@@ -87,34 +115,84 @@ const LandingPage: React.FC = () => {
             )}
           </p>
 
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="#find-constituency"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent default jump
-                const target = document.getElementById('find-constituency');
-                if (target) {
-                  target.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="bg-[#0b3c5d] text-white px-8 py-3 rounded-sm 
-             font-semibold text-lg shadow-md 
-             hover:bg-[#072c45] transition cursor-pointer"
-            >
-              {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
-            </a>
+          {/* Buttons / Actions Area */}
+          {user?.is_verified ? (
+            <div className="w-full max-w-2xl mx-auto bg-emerald-500/20 backdrop-blur-md border border-emerald-400/40 p-6 rounded-md mb-4 animate-fade-in-up shadow-lg">
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center space-x-2 text-white mb-3 bg-emerald-600/30 px-4 py-1.5 rounded-full border border-emerald-400/30">
+                  <FaCheckCircle className="w-4 h-4 text-emerald-300" />
+                  <span className="font-bold text-sm tracking-wide uppercase">
+                    {t('तपाईं प्रमाणीकृत हुनुहुन्छ', 'You are verified')}
+                  </span>
+                </div>
 
+                <h3 className="text-lg text-emerald-50 mb-6 font-medium">
+                  {t(
+                    'तपाईंको क्षेत्रको विवरण हेर्नुहोस्',
+                    'Welcome back. Access your constituency dashboard.'
+                  )}
+                </h3>
 
-            <Link
-              to="/verify"
-              className="bg-white/10 border border-white/40 text-white 
-                        px-8 py-3 rounded-sm font-semibold text-lg 
-                        hover:bg-white/20 transition"
-            >
-              {t('प्रमाणीकरण', 'Verify Identity')}
-            </Link>
-          </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                  <Link
+                    to={`/constituency/${user.constituency_id}`}
+                    className="flex-1 bg-white text-[#0094da] px-6 py-3 rounded-sm font-bold shadow-md hover:bg-slate-50 transition flex items-center justify-center border border-transparent"
+                  >
+                    {t('मेरो क्षेत्र', 'My Area')} <FaArrowRight className="ml-2" />
+                  </Link>
+
+                  <button
+                    onClick={() => setShowDemoModal(true)}
+                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-sm font-bold shadow-md hover:bg-red-700 transition flex items-center justify-center border border-transparent"
+                  >
+                    <FaPlayCircle className="mr-2" /> {t('डेमो', 'Demo')}
+                  </button>
+                </div>
+
+                <div className="mt-4">
+                  <a
+                    href="#find-constituency"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const target = document.getElementById('find-constituency');
+                      if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="text-sm text-blue-200 hover:text-white underline decoration-blue-300/50 underline-offset-4"
+                  >
+                    {t('अरु क्षेत्र हेर्नुहोस्', 'Explore other constituencies')}
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="#find-constituency"
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent default jump
+                  const target = document.getElementById('find-constituency');
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="bg-[#0b3c5d] text-white px-8 py-3 rounded-sm 
+                 font-semibold text-lg shadow-md 
+                 hover:bg-[#072c45] transition cursor-pointer flex items-center justify-center"
+              >
+                {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
+              </a>
+
+              <button
+                onClick={() => setShowDemoModal(true)}
+                className="bg-red-600 text-white px-8 py-3 rounded-sm 
+                            font-semibold text-lg shadow-md 
+                            hover:bg-red-700 transition cursor-pointer flex items-center justify-center"
+              >
+                <FaPlayCircle className="mr-2" />
+                {t('डेमो हेर्नुहोस्', 'View Demo')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -290,8 +368,8 @@ const LandingPage: React.FC = () => {
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
                     className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
-                        ? 'bg-[#0094da] text-white border border-[#0094da]'
-                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      ? 'bg-[#0094da] text-white border border-[#0094da]'
+                      : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                       }`}
                   >
                     {pageNum}
