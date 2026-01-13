@@ -7,7 +7,16 @@ import { useAuth } from '../services/authService';
 import { Constituency } from '../types';
 import { PROVINCES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding, FaCheckCircle, FaArrowRight, FaPlayCircle, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevronRight, FaBuilding, FaCheckCircle, FaArrowRight, FaPlayCircle, FaTimes, FaClock, FaExclamationTriangle, FaMapMarkerAlt, FaExternalLinkAlt } from 'react-icons/fa';
+
+// Area Specific Images Mapping
+const AREA_IMAGES: Record<string, string> = {
+  'bhaktapur-1': 'https://www.relaxgetaways.com/uploads/img/nagarkot-hiking-with-sunrise-1.jpeg', // Bhaktapur/Nagarkot
+  'bara-3': 'https://jankarinepal.com/wp-content/uploads/2019/10/nijgadh.jpg', // Terai/Fields
+  'kathmandu-7': 'https://tse1.mm.bing.net/th/id/OIP.TnWy3h8YcGkT8xyOWDx79QHaFj?rs=1&pid=ImgDetMain&o=7&rm=3' // Kathmandu
+};
+
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=800'; // Generic Nepal
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +45,10 @@ const LandingPage: React.FC = () => {
   };
 
   const filteredConstituencies = constituencies.filter(c => {
+    // Strict filter for unverified users: Only show specific 3 areas
+    const allowedIds = ['bhaktapur-1', 'bara-3', 'kathmandu-7'];
+    if (!allowedIds.includes(c.id)) return false;
+
     const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.district.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProvince = selectedProvince ? c.province === selectedProvince : true;
@@ -52,6 +65,168 @@ const LandingPage: React.FC = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const getPendingDeadline = () => {
+    const target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const ad = target.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const bsYear = target.getFullYear() + 57;
+    const bsMonths = ["Baisakh", "Jestha", "Ashad", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"];
+    const bsMonthIndex = (target.getMonth() + 8) % 12;
+    const bsDay = target.getDate();
+    return { ad, bs: `${bsYear} ${bsMonths[bsMonthIndex]} ${bsDay}` };
+  };
+
+  const deadline = getPendingDeadline();
+
+  const renderUserStatusSection = () => {
+      // 1. Pending
+      if (user?.verification_status === 'pending') {
+          return (
+              <div className="w-full max-w-2xl mx-auto bg-amber-500/20 backdrop-blur-md border border-amber-400/50 p-6 rounded-md mb-6 animate-fade-in-up shadow-lg">
+                  <div className="flex flex-col items-center text-center">
+                      <div className="bg-amber-100 p-3 rounded-full mb-3 shadow-inner">
+                           <FaClock className="w-8 h-8 text-amber-600" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2">
+                          {t('तपाईंको प्रमाणिकरण पर्खाइमा छ', 'Your verification is pending')}
+                      </h3>
+                      <p className="text-amber-100 text-sm mb-4 font-medium">
+                          {t(
+                              `२४ घण्टा भित्र निर्णय हुनेछ: ${deadline.bs}`,
+                              `It will be decided within 24 hours: ${deadline.ad}`
+                          )}
+                      </p>
+                      <button
+                          onClick={() => setShowDemoModal(true)}
+                          className="bg-red-600 text-white px-6 py-2 rounded-sm font-bold shadow-md hover:bg-red-700 transition flex items-center text-sm"
+                      >
+                           <FaPlayCircle className="mr-2"/> {t('डेमो हेर्नुहोस्', 'View Demo')}
+                      </button>
+                  </div>
+              </div>
+          );
+      }
+  
+      // 2. Verified - Specialized Constituency Card
+      if (user?.verification_status === 'approved' && user.constituency_id) {
+           const myConstituency = constituencies.find(c => c.id === user.constituency_id);
+           const bgImage = AREA_IMAGES[user.constituency_id] || DEFAULT_IMAGE;
+           const constituencyName = myConstituency ? myConstituency.name : user.constituency_id;
+           const districtName = myConstituency ? myConstituency.district : '';
+
+           return (
+              <div className="mt-8 animate-fade-in-up flex justify-center">
+                  <div className="w-full max-w-sm bg-white rounded-lg shadow-2xl overflow-hidden transform transition-all hover:scale-105 border border-white/20">
+                      {/* Image Top */}
+                      <div className="h-48 relative overflow-hidden group">
+                          <img 
+                            src={bgImage} 
+                            alt={constituencyName} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center">
+                              <FaCheckCircle className="mr-1" />
+                              {t('प्रमाणित', 'Verified')}
+                          </div>
+                      </div>
+
+                      {/* Content Bottom */}
+                      <div className="p-6 text-center bg-white">
+                          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{t('तपाईंको निर्वाचन क्षेत्र', 'Your Constituency')}</h4>
+                          <h2 className="text-2xl font-bold text-slate-800 mb-1">{constituencyName}</h2>
+                          <p className="text-sm text-slate-500 font-medium mb-6">{districtName}, Nepal</p>
+
+                          <div className="space-y-3">
+                              <Link
+                                  to={`/constituency/${user.constituency_id}`}
+                                  className="w-full block bg-[#0094da] text-white py-3 rounded-sm font-bold shadow-md hover:bg-[#007bb8] transition flex items-center justify-center"
+                              >
+                                  {t('ड्यासबोर्डमा जानुहोस्', 'Enter Constituency')} <FaArrowRight className="ml-2"/>
+                              </Link>
+                               <button
+                                  onClick={() => setShowDemoModal(true)}
+                                  className="w-full block bg-red-50 text-red-600 border border-red-200 py-3 rounded-sm font-bold shadow-sm hover:bg-red-100 transition flex items-center justify-center"
+                              >
+                                   <FaPlayCircle className="mr-2"/> {t('डेमो हेर्नुहोस्', 'View Demo')}
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          );
+      }
+  
+      // 3. Rejected
+      if (user?.verification_status === 'rejected') {
+          return (
+               <div className="w-full max-w-2xl mx-auto bg-red-500/20 backdrop-blur-md border border-red-400/50 p-6 rounded-md mb-6 animate-fade-in-up shadow-lg">
+                  <div className="flex flex-col items-center text-center">
+                      <div className="bg-red-100 p-3 rounded-full mb-3 shadow-inner">
+                           <FaExclamationTriangle className="w-8 h-8 text-red-600" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">
+                          {t('तपाईंको प्रमाणिकरण अस्वीकृत भएको छ', 'Your verification was rejected')}
+                      </h3>
+                      <p className="text-red-100 text-sm mb-6 max-w-lg">
+                          {t(
+                              'कृपया प्रमाणिक जानकारी सहित फेरि प्रयास गर्नुहोस्।',
+                              'Please submit authentic information and try again.'
+                          )}
+                      </p>
+                      <div className="flex gap-4">
+                        <Link
+                            to="/verify"
+                            className="bg-white text-red-600 px-6 py-3 rounded-sm font-bold shadow-md hover:bg-slate-50 transition"
+                        >
+                            {t('फेरि प्रमाणिकरण गर्नुहोस्', 'Verify Again')}
+                        </Link>
+                         <button
+                            onClick={() => setShowDemoModal(true)}
+                            className="bg-red-600 text-white px-6 py-3 rounded-sm font-bold shadow-md hover:bg-red-700 transition flex items-center"
+                        >
+                             <FaPlayCircle className="mr-2"/> {t('डेमो', 'Demo')}
+                        </button>
+                      </div>
+                  </div>
+              </div>
+          );
+      }
+  
+      // 4. New User / Unverified (Default)
+      return (
+           <div className="w-full max-w-2xl mx-auto bg-[#0094da]/30 backdrop-blur-md border border-white/20 p-6 rounded-md mb-6 animate-fade-in-up shadow-lg">
+              <div className="flex flex-col items-center text-center">
+                  <div className="bg-white/20 p-3 rounded-full mb-3 backdrop-blur-sm shadow-inner">
+                          <FaMapMarkerAlt className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-6">
+                      {t('आफ्नो क्षेत्र खोज्नुहोस्', 'Find Your Area')}
+                  </h3>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                      <a
+                          href="#find-constituency"
+                          onClick={(e) => {
+                              e.preventDefault();
+                              const target = document.getElementById('find-constituency');
+                              if (target) target.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="bg-white text-[#0094da] px-8 py-3 rounded-sm font-bold shadow-md hover:bg-slate-50 transition flex items-center justify-center"
+                      >
+                          <FaSearch className="mr-2" /> {t('खोज्नुहोस्', 'Search Area')}
+                      </a>
+                       <button
+                          onClick={() => setShowDemoModal(true)}
+                          className="bg-red-600 text-white px-8 py-3 rounded-sm font-bold shadow-md hover:bg-red-700 transition flex items-center justify-center"
+                      >
+                          <FaPlayCircle className="mr-2" /> {t('डेमो हेर्नुहोस्', 'View Demo')}
+                      </button>
+                  </div>
+              </div>
+          </div>
+      );
   };
 
   return (
@@ -80,9 +255,8 @@ const LandingPage: React.FC = () => {
         </div>
       )}
 
-      {/* Hero Section - Official Tone */}
+      {/* Hero Section */}
       <div className="bg-[#0094da] text-white relative border-b border-white/20">
-        {/* pattern overlay */}
         <div className="absolute inset-0 bg-[#0b3c5d] opacity-20 pattern-grid-lg"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8 text-center">
@@ -107,92 +281,19 @@ const LandingPage: React.FC = () => {
             )}
           </p>
 
-          {/* Context Description */}
-          <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto font-light">
-            {t(
-              'लोकतन्त्रको सुरुवात तपाईंबाट हुन्छ। आफ्नो क्षेत्रमा सहभागी हुनुहोस्, उम्मेदवार छान्नुहोस् र जवाफदेहिता सुनिश्चित गर्नुहोस्।',
-              'Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.'
-            )}
-          </p>
-
-          {/* Buttons / Actions Area */}
-          {user?.is_verified ? (
-            <div className="w-full max-w-2xl mx-auto bg-emerald-500/20 backdrop-blur-md border border-emerald-400/40 p-6 rounded-md mb-4 animate-fade-in-up shadow-lg">
-              <div className="flex flex-col items-center text-center">
-                <div className="flex items-center space-x-2 text-white mb-3 bg-emerald-600/30 px-4 py-1.5 rounded-full border border-emerald-400/30">
-                  <FaCheckCircle className="w-4 h-4 text-emerald-300" />
-                  <span className="font-bold text-sm tracking-wide uppercase">
-                    {t('तपाईं प्रमाणीकृत हुनुहुन्छ', 'You are verified')}
-                  </span>
-                </div>
-
-                <h3 className="text-lg text-emerald-50 mb-6 font-medium">
-                  {t(
-                    'तपाईंको क्षेत्रको विवरण हेर्नुहोस्',
-                    'Welcome back. Access your constituency dashboard.'
-                  )}
-                </h3>
-
-                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                  <Link
-                    to={`/constituency/${user.constituency_id}`}
-                    className="flex-1 bg-white text-[#0094da] px-6 py-3 rounded-sm font-bold shadow-md hover:bg-slate-50 transition flex items-center justify-center border border-transparent"
-                  >
-                    {t('मेरो क्षेत्र', 'My Area')} <FaArrowRight className="ml-2" />
-                  </Link>
-
-                  <button
-                    onClick={() => setShowDemoModal(true)}
-                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-sm font-bold shadow-md hover:bg-red-700 transition flex items-center justify-center border border-transparent"
-                  >
-                    <FaPlayCircle className="mr-2" /> {t('डेमो', 'Demo')}
-                  </button>
-                </div>
-
-                <div className="mt-4">
-                  <a
-                    href="#find-constituency"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const target = document.getElementById('find-constituency');
-                      if (target) target.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="text-sm text-blue-200 hover:text-white underline decoration-blue-300/50 underline-offset-4"
-                  >
-                    {t('अरु क्षेत्र हेर्नुहोस्', 'Explore other constituencies')}
-                  </a>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#find-constituency"
-                onClick={(e) => {
-                  e.preventDefault(); // Prevent default jump
-                  const target = document.getElementById('find-constituency');
-                  if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="bg-[#0b3c5d] text-white px-8 py-3 rounded-sm 
-                 font-semibold text-lg shadow-md 
-                 hover:bg-[#072c45] transition cursor-pointer flex items-center justify-center"
-              >
-                {t('मेरो क्षेत्र खोज्नुहोस्', 'Find My Area')}
-              </a>
-
-              <button
-                onClick={() => setShowDemoModal(true)}
-                className="bg-red-600 text-white px-8 py-3 rounded-sm 
-                            font-semibold text-lg shadow-md 
-                            hover:bg-red-700 transition cursor-pointer flex items-center justify-center"
-              >
-                <FaPlayCircle className="mr-2" />
-                {t('डेमो हेर्नुहोस्', 'View Demo')}
-              </button>
-            </div>
+          {/* Context Description - Hidden for verified users to clear clutter */}
+          {(!user?.is_verified) && (
+            <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto font-light">
+                {t(
+                'लोकतन्त्रको सुरुवात तपाईंबाट हुन्छ। आफ्नो क्षेत्रमा सहभागी हुनुहोस्, उम्मेदवार छान्नुहोस् र जवाफदेहिता सुनिश्चित गर्नुहोस्।',
+                'Democracy starts with you. Participate in your constituency, select candidates, and ensure accountability.'
+                )}
+            </p>
           )}
+
+          {/* Dynamic Status Section */}
+          {renderUserStatusSection()}
+          
         </div>
       </div>
 
@@ -244,7 +345,8 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Finder Tool */}
+      {/* Finder Tool (Hidden if Verified) */}
+      {!user?.is_verified && (
       <div id="find-constituency" className="py-16 bg-slate-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white border border-slate-300 p-8 shadow-sm rounded-sm">
@@ -281,8 +383,10 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
-      {/* Directory Grid */}
+      {/* Directory Grid - Only for Unverified Users */}
+      {!user?.is_verified && (
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-200 pb-4">
@@ -313,36 +417,34 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {currentConstituencies.map((c) => (
-              <div key={c.id} className="bg-white border border-slate-200 hover:border-[#0094da] transition p-5 group">
-                <div className="mb-3">
-                  <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
-                    {c.province.replace('Province', '')}
-                  </span>
-                  <div className="text-xs text-slate-400 font-english">{c.district}</div>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-[#0094da] transition">{c.name}</h3>
-                <div className="flex items-center space-x-3 pt-3 border-t border-slate-100">
-                  {c.mp_image ? (
-                    <img src={c.mp_image} alt={c.mp_name} className="w-8 h-8 grayscale group-hover:grayscale-0 transition object-cover rounded-sm" />
-                  ) : (
-                    <div className="w-8 h-8 bg-slate-100 flex items-center justify-center text-slate-400 rounded-sm">
-                      <FaBuilding className="w-3 h-3" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {currentConstituencies.map((c) => {
+              // Determine which image to show based on ID
+              const areaImage = AREA_IMAGES[c.id] || DEFAULT_IMAGE;
+              
+              return (
+              <div key={c.id} className="bg-white border border-slate-200 hover:border-[#0094da] transition group shadow-lg rounded-lg overflow-hidden flex flex-col transform hover:scale-105 duration-300">
+                <div className="h-48 overflow-hidden relative">
+                    <img 
+                        src={areaImage} 
+                        alt={c.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700" 
+                    />
+                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-sm">
+                        {c.province.replace('Province', '')}
                     </div>
-                  )}
-                  <div className="text-xs">
-                    <p className="text-slate-500">{t('प्रतिनिधि', 'Representative')}</p>
-                    <p className="font-medium text-slate-800 truncate max-w-[100px]">{c.mp_name || t("पद रिक्त", "Vacant")}</p>
-                  </div>
                 </div>
-                <div className="mt-4">
-                  <Link to={`/constituency/${c.id}`} className="text-xs font-bold text-[#0094da] hover:underline uppercase tracking-wide">
-                    {t('विवरण हेर्नुहोस्', 'View Details')} &rarr;
-                  </Link>
+                
+                <div className="p-6 flex-grow flex flex-col items-center text-center">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-[#0094da] transition">{c.name}</h3>
+                    <p className="text-sm text-slate-500 font-medium mb-4">{c.district}, Nepal</p>
+                    
+                    <Link to={`/constituency/${c.id}`} className="mt-auto w-full bg-[#0094da] text-white py-2 rounded-sm font-bold shadow-sm hover:bg-[#007bb8] transition flex items-center justify-center">
+                        {t('क्षेत्र हेर्नुहोस्', 'View Constituency')} <FaArrowRight className="ml-2 w-3 h-3" />
+                    </Link>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Pagination */}
@@ -368,8 +470,8 @@ const LandingPage: React.FC = () => {
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
                     className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
-                      ? 'bg-[#0094da] text-white border border-[#0094da]'
-                      : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                        ? 'bg-[#0094da] text-white border border-[#0094da]'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                       }`}
                   >
                     {pageNum}
@@ -388,6 +490,7 @@ const LandingPage: React.FC = () => {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 };
