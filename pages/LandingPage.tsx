@@ -13,7 +13,7 @@ import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevro
 const AREA_IMAGES: Record<string, string> = {
   'bhaktapur-1': 'https://www.relaxgetaways.com/uploads/img/nagarkot-hiking-with-sunrise-1.jpeg', // Bhaktapur/Nagarkot
   'bara-3': 'https://jankarinepal.com/wp-content/uploads/2019/10/nijgadh.jpg', // Terai/Fields
-  'kathmandu-7': 'https://tse1.mm.bing.net/th/id/OIP.TnWy3h8YcGkT8xyOWDx79QHaFj?rs=1&pid=ImgDetMain&o=7&rm=3' // Kathmandu
+  'kathmandu-7': 'https://www.trektonepal.com/files/pics/View-tower-Kathmandu-Mudhkhu-Vanjhyang.jpg' // Kathmandu
 };
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=800'; // Generic Nepal
@@ -297,6 +297,118 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Directory Grid - Only for Unverified Users - MOVED TO TOP */}
+      {!user?.is_verified && (
+      <div className="py-16 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+                <h2 className="text-2xl font-bold text-slate-900">{t('निर्वाचन क्षेत्र निर्देशिका', 'Constituency Directory')}</h2>
+            </div>
+          
+            {/* Keeping the search filter functionality as per instructions to not change functionality, but simplifying appearance */}
+            <div className="flex flex-col md:flex-row justify-end items-center mb-8 gap-3">
+              <div className="relative w-full md:w-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-slate-400 w-3 h-3" />
+                </div>
+                <input
+                  type="text"
+                  placeholder={t('जिल्ला खोज्नुहोस्...', 'Search district...')}
+                  className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] w-full text-sm font-english"
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                />
+              </div>
+
+              <select
+                className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] text-sm font-english bg-white w-full md:w-auto"
+                value={selectedProvince}
+                onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
+              >
+                <option value="">{t('सबै प्रदेश', 'All Provinces')}</option>
+                {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {currentConstituencies.map((c) => {
+              // Determine which image to show based on ID
+              const areaImage = AREA_IMAGES[c.id] || DEFAULT_IMAGE;
+              
+              return (
+              <Link 
+                to={`/constituency/${c.id}`} 
+                key={c.id} 
+                className="bg-white border border-slate-200 hover:border-[#0094da] transition group shadow-lg rounded-lg overflow-hidden flex flex-col transform hover:scale-105 duration-300 h-full cursor-pointer block"
+              >
+                <div className="h-48 overflow-hidden relative">
+                    <img 
+                        src={areaImage} 
+                        alt={c.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700" 
+                    />
+                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-sm">
+                        {c.province.replace('Province', '')}
+                    </div>
+                </div>
+                
+                <div className="p-6 flex-grow flex flex-col items-center text-center">
+                    <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-[#0094da] transition">{c.name}</h3>
+                    <p className="text-sm text-slate-500 font-medium mb-6">{c.district}, Nepal</p>
+                    
+                    <div className="mt-auto w-full bg-[#0094da] text-white py-3 rounded-sm font-bold shadow-sm group-hover:bg-[#007bb8] transition flex items-center justify-center">
+                        {t('क्षेत्र हेर्नुहोस्', 'View Constituency')} <FaArrowRight className="ml-2 w-3 h-3" />
+                    </div>
+                </div>
+              </Link>
+            )})}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center items-center space-x-1">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+              >
+                <FaChevronLeft className="w-3 h-3" />
+              </button>
+
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5 && currentPage > 3) {
+                  pageNum = currentPage - 3 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => goToPage(pageNum)}
+                    className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
+                        ? 'bg-[#0094da] text-white border border-[#0094da]'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+              >
+                <FaChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      )}
+
       {/* Process Steps - Institutional Cards */}
       <div className="py-16 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -381,113 +493,6 @@ const LandingPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
-      )}
-
-      {/* Directory Grid - Only for Unverified Users */}
-      {!user?.is_verified && (
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-200 pb-4">
-            <h2 className="text-xl font-bold text-slate-900">{t('निर्वाचन क्षेत्रहरू', 'Constituency Directory')}</h2>
-
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-slate-400 w-3 h-3" />
-                </div>
-                <input
-                  type="text"
-                  placeholder={t('जिल्ला खोज्नुहोस्...', 'Search district...')}
-                  className="pl-8 pr-4 py-2 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] w-full text-sm font-english"
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                />
-              </div>
-
-              <select
-                className="py-2 pl-3 pr-8 border border-slate-300 rounded-sm focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] text-sm font-english bg-white"
-                value={selectedProvince}
-                onChange={(e) => { setSelectedProvince(e.target.value); setCurrentPage(1); }}
-              >
-                <option value="">{t('सबै प्रदेश', 'All Provinces')}</option>
-                {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentConstituencies.map((c) => {
-              // Determine which image to show based on ID
-              const areaImage = AREA_IMAGES[c.id] || DEFAULT_IMAGE;
-              
-              return (
-              <div key={c.id} className="bg-white border border-slate-200 hover:border-[#0094da] transition group shadow-lg rounded-lg overflow-hidden flex flex-col transform hover:scale-105 duration-300">
-                <div className="h-48 overflow-hidden relative">
-                    <img 
-                        src={areaImage} 
-                        alt={c.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700" 
-                    />
-                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-sm">
-                        {c.province.replace('Province', '')}
-                    </div>
-                </div>
-                
-                <div className="p-6 flex-grow flex flex-col items-center text-center">
-                    <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-[#0094da] transition">{c.name}</h3>
-                    <p className="text-sm text-slate-500 font-medium mb-4">{c.district}, Nepal</p>
-                    
-                    <Link to={`/constituency/${c.id}`} className="mt-auto w-full bg-[#0094da] text-white py-2 rounded-sm font-bold shadow-sm hover:bg-[#007bb8] transition flex items-center justify-center">
-                        {t('क्षेत्र हेर्नुहोस्', 'View Constituency')} <FaArrowRight className="ml-2 w-3 h-3" />
-                    </Link>
-                </div>
-              </div>
-            )})}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-12 flex justify-center items-center space-x-1">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-              >
-                <FaChevronLeft className="w-3 h-3" />
-              </button>
-
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = i + 1;
-                if (totalPages > 5 && currentPage > 3) {
-                  pageNum = currentPage - 3 + i;
-                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => goToPage(pageNum)}
-                    className={`w-8 h-8 text-sm font-medium transition rounded-sm ${currentPage === pageNum
-                        ? 'bg-[#0094da] text-white border border-[#0094da]'
-                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                      }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-              >
-                <FaChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-          )}
         </div>
       </div>
       )}
