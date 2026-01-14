@@ -16,6 +16,7 @@ export interface User {
   municipality?: string;
   ward?: string;
   id_image_url?: string;
+  force_logout?: boolean;
 }
 
 export interface Constituency {

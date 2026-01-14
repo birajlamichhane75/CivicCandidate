@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import { User, VerificationStatus } from '../types';
 
@@ -14,18 +15,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  // Ref to keep track of user ID for the interval to prevent stale closure
+  const userRef = useRef<User | null>(null);
 
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  // Initial Load & Heartbeat
   useEffect(() => {
     const initializeAuth = async () => {
       const storedUser = localStorage.getItem('demo_user');
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        // Set initial state from local storage to prevent flicker
-        setUser(parsedUser);
-
-        // Fetch fresh data from DB to get latest verification status and constituency_id
+        
+        // Fetch fresh data from DB
         try {
-           if (parsedUser.phone_number === 'admin') return; // Skip for static admin
+           if (parsedUser.phone_number === 'admin') {
+               setUser(parsedUser);
+               return; 
+           }
            
            const { data, error } = await supabase
             .from('users')
@@ -34,16 +43,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
           
           if (data) {
+            // Check for forced logout
+            if (data.force_logout) {
+                logout();
+                return;
+            }
             setUser(data);
             localStorage.setItem('demo_user', JSON.stringify(data));
+          } else {
+              // User might be deleted
+              logout();
           }
         } catch (err) {
           console.error("Error refreshing user session:", err);
+          // If error is serious (e.g., auth failure), maybe logout? 
+          // For now, keep local state to allow offline-ish usage unless explicitly kicked.
+          setUser(parsedUser);
         }
       }
     };
 
     initializeAuth();
+
+    // Heartbeat to check for force logout every 10 seconds
+    const intervalId = setInterval(async () => {
+        if (userRef.current && userRef.current.role !== 'admin') {
+             const { data } = await supabase
+                .from('users')
+                .select('force_logout')
+                .eq('id', userRef.current.id)
+                .single();
+            
+            if (data && data.force_logout) {
+                console.log("Forced logout detected.");
+                logout();
+            }
+        }
+    }, 10000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const login = async (identifier: string, secret: string): Promise<boolean> => {
@@ -82,13 +120,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .insert([{ 
                 phone_number: identifier,
                 role: 'citizen',
-                verification_status: 'unverified'
+                verification_status: 'unverified',
+                force_logout: false
             }])
             .select()
             .single();
           
           if (createError) throw createError;
           existingUser = newUser;
+        } else {
+            // Reset force_logout flag on successful login
+            await supabase
+                .from('users')
+                .update({ force_logout: false })
+                .eq('id', existingUser.id);
+            existingUser.force_logout = false;
         }
 
         setUser(existingUser);
@@ -106,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('demo_user');
+    // We do NOT clear history/navigation here, router handles redirection via ProtectedRoute
   };
 
   const updateUserVerification = (status: VerificationStatus, constituencyId?: string) => {

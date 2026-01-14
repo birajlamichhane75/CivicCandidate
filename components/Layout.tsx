@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
@@ -79,9 +80,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <span className="text-xs font-bold text-slate-900 font-english">{user.phone_number}</span>
                         <span className="text-[10px] uppercase text-slate-500 font-english tracking-wide">{user.role}</span>
                     </div>
-                    <button onClick={handleLogout} className="text-slate-500 hover:text-red-600 p-2 transition" title={t('लगआउट', 'Logout')}>
-                      <FaSignOutAlt className="h-5 w-5" />
-                    </button>
+                    {/* ONLY SHOW LOGOUT FOR ADMIN */}
+                    {user.role === 'admin' && (
+                      <button onClick={handleLogout} className="text-slate-500 hover:text-red-600 p-2 transition" title={t('लगआउट', 'Logout')}>
+                        <FaSignOutAlt className="h-5 w-5" />
+                      </button>
+                    )}
                   </div>
                 </>
               ) : (
@@ -147,9 +151,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                          {t('प्रमाणीकरण', 'Verify')}
                        </Link>
                     )}
-                    <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full text-left block px-3 py-3 text-base font-medium text-red-600 hover:bg-red-50 border-l-4 border-transparent hover:border-red-600">
-                      {t('लगआउट', 'Logout')}
-                    </button>
+                    {user.role === 'admin' && (
+                      <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full text-left block px-3 py-3 text-base font-medium text-red-600 hover:bg-red-50 border-l-4 border-transparent hover:border-red-600">
+                        {t('लगआउट', 'Logout')}
+                      </button>
+                    )}
                   </>
                ) : (
                   <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 border-l-4 border-transparent hover:border-[#0094da]">

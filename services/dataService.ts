@@ -289,3 +289,25 @@ export const processVerification = async (requestId: string, approved: boolean):
     .update(updatePayload)
     .eq('id', request.user_id);
 };
+
+// --- User Management (Admin) ---
+
+export const getAllUsers = async (): Promise<User[]> => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .neq('role', 'admin') // Don't show admin in the list
+    .order('phone_number', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const forceLogoutUser = async (userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('users')
+    .update({ force_logout: true })
+    .eq('id', userId);
+
+  if (error) throw error;
+};
