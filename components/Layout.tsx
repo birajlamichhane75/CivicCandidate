@@ -199,7 +199,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-8 border-t border-slate-800 text-xs text-center font-english text-slate-500">
-          &copy; {new Date().getFullYear()} Civic Candidate. Civic Tech Initiative.
+           {/* STEALTH TRIGGER FOR ADMIN LOGIN */}
+           <span 
+              onDoubleClick={() => navigate('/sys/access-portal')} 
+              className="cursor-default select-none"
+              title="©"
+            >
+             &copy; {new Date().getFullYear()} Civic Candidate. Civic Tech Initiative.
+           </span>
         </div>
       </footer>
     </div>

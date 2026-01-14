@@ -6,6 +6,7 @@ import { User, VerificationStatus } from '../types';
 interface AuthContextType {
   user: User | null;
   login: (phone: string, otp: string) => Promise<boolean>;
+  loginAdmin: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateUserVerification: (status: VerificationStatus, constituencyId?: string) => void;
   isAuthenticated: boolean;
@@ -31,7 +32,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Fetch fresh data from DB
         try {
-           if (parsedUser.phone_number === 'admin') {
+           // Admin user case (no numeric ID usually, or special handling)
+           if (parsedUser.role === 'admin') {
                setUser(parsedUser);
                return; 
            }
@@ -56,8 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (err) {
           console.error("Error refreshing user session:", err);
-          // If error is serious (e.g., auth failure), maybe logout? 
-          // For now, keep local state to allow offline-ish usage unless explicitly kicked.
           setUser(parsedUser);
         }
       }
@@ -84,8 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
                 
                 // 2. Implicit Force Logout via Verification Revocation
-                // If user WAS verified locally, but DB says unverified/rejected/pending, logout them out.
-                // This satisfies the requirement: "If admin logs out a user: User must re-authenticate"
                 if (userRef.current.is_verified && !data.is_verified) {
                     console.log("Verification revoked. Forcing logout.");
                     logout();
@@ -98,24 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(intervalId);
   }, []);
 
+  // 1. CITIZEN LOGIN (Phone + OTP)
+  // Security: MUST reject if the user role is 'admin'
   const login = async (identifier: string, secret: string): Promise<boolean> => {
-    // Admin Login
-    if (identifier === 'admin') {
-      if (secret === 'admin123') {
-        const { data: adminUser, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('phone_number', 'admin')
-          .single();
-
-        if (adminUser) {
-           setUser(adminUser);
-           localStorage.setItem('demo_user', JSON.stringify(adminUser));
-           return true;
-        }
-      }
-      return false;
-    }
+    // Admin checks in this flow are REMOVED. 
+    // Admins must use loginAdmin via the hidden route.
 
     // Citizen Login (Simulating OTP)
     if (secret === '123456') {
@@ -127,8 +112,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('phone_number', identifier)
           .single();
 
-        if (!existingUser) {
-          // Register new user
+        if (existingUser) {
+            // SECURITY CHECK: Block Admin from using OTP flow
+            if (existingUser.role === 'admin') {
+                console.warn("Security Alert: Admin attempted login via OTP flow.");
+                alert("Access Denied: Administrative accounts cannot use this login method.");
+                return false;
+            }
+
+            // Reset force_logout flag on successful login (Best Effort)
+            supabase
+                .from('users')
+                .update({ force_logout: false })
+                .eq('id', existingUser.id)
+                .then(({error}) => {
+                    if (error) console.warn("Could not reset force_logout:", error.message);
+                });
+            existingUser.force_logout = false;
+        } else {
+          // Register new user (Citizens only)
           const { data: newUser, error: createError } = await supabase
             .from('users')
             .insert([{ 
@@ -142,17 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (createError) throw createError;
           existingUser = newUser;
-        } else {
-            // Reset force_logout flag on successful login (Best Effort)
-            // We do not await/block on this, so if column is missing, login still succeeds.
-            supabase
-                .from('users')
-                .update({ force_logout: false })
-                .eq('id', existingUser.id)
-                .then(({error}) => {
-                    if (error) console.warn("Could not reset force_logout:", error.message);
-                });
-            existingUser.force_logout = false;
         }
 
         setUser(existingUser);
@@ -167,10 +158,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
+  // 2. ADMIN LOGIN (Email + Password)
+  // Security: Only accessed via hidden route
+  const loginAdmin = async (email: string, password: string): Promise<boolean> => {
+      // Hardcoded check for this demo environment to separate flow without DB migrations
+      // In a real production app, this would query Supabase Auth or Users table with hashed password
+      if (email === 'admin@civiccandidate.org' && password === 'admin123') {
+          // Fetch the actual admin record from DB to maintain ID consistency
+          const { data: adminUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('role', 'admin') 
+            .limit(1)
+            .single();
+            
+          if (adminUser) {
+              setUser(adminUser);
+              localStorage.setItem('demo_user', JSON.stringify(adminUser));
+              return true;
+          }
+      }
+      return false;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('demo_user');
-    // We do NOT clear history/navigation here, router handles redirection via ProtectedRoute
   };
 
   const updateUserVerification = (status: VerificationStatus, constituencyId?: string) => {
@@ -187,7 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUserVerification, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, loginAdmin, logout, updateUserVerification, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

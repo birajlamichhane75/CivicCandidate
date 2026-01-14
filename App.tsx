@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 import VerificationPage from './pages/VerificationPage';
 import VerificationStatusPage from './pages/VerificationStatusPage';
 import ConstituencyDashboard from './pages/ConstituencyDashboard';
@@ -24,6 +26,9 @@ const App: React.FC = () => {
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              
+              {/* HIDDEN ADMIN ROUTE - OBFUSCATED */}
+              <Route path="/sys/access-portal" element={<AdminLoginPage />} />
               
               {/* Verification Routes */}
               <Route path="/verify" element={
