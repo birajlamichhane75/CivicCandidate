@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
           
           if (data) {
-            // Check for forced logout
+            // Check for forced logout logic
             if (data.force_logout) {
                 logout();
                 return;
@@ -65,18 +65,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Heartbeat to check for force logout every 10 seconds
+    // Heartbeat to check for force logout or status revocation every 10 seconds
     const intervalId = setInterval(async () => {
         if (userRef.current && userRef.current.role !== 'admin') {
+             // We select '*' to be safe against missing specific columns causing query errors
              const { data } = await supabase
                 .from('users')
-                .select('force_logout')
+                .select('*') 
                 .eq('id', userRef.current.id)
                 .single();
             
-            if (data && data.force_logout) {
-                console.log("Forced logout detected.");
-                logout();
+            if (data) {
+                // 1. Explicit Force Logout
+                if (data.force_logout) {
+                    console.log("Forced logout flag detected.");
+                    logout();
+                    return;
+                }
+                
+                // 2. Implicit Force Logout via Verification Revocation
+                // If user WAS verified locally, but DB says unverified/rejected/pending, logout them out.
+                // This satisfies the requirement: "If admin logs out a user: User must re-authenticate"
+                if (userRef.current.is_verified && !data.is_verified) {
+                    console.log("Verification revoked. Forcing logout.");
+                    logout();
+                    return;
+                }
             }
         }
     }, 10000);
@@ -129,11 +143,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (createError) throw createError;
           existingUser = newUser;
         } else {
-            // Reset force_logout flag on successful login
-            await supabase
+            // Reset force_logout flag on successful login (Best Effort)
+            // We do not await/block on this, so if column is missing, login still succeeds.
+            supabase
                 .from('users')
                 .update({ force_logout: false })
-                .eq('id', existingUser.id);
+                .eq('id', existingUser.id)
+                .then(({error}) => {
+                    if (error) console.warn("Could not reset force_logout:", error.message);
+                });
             existingUser.force_logout = false;
         }
 

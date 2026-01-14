@@ -43,10 +43,11 @@ const AdminDashboard: React.FC = () => {
       if (window.confirm(`Are you sure you want to FORCE LOGOUT user ${phoneNumber}? They will need to login again.`)) {
           try {
               await forceLogoutUser(userId);
-              alert(`User ${phoneNumber} has been flagged for logout.`);
+              alert(`User ${phoneNumber} has been reset and will be logged out.`);
               loadData();
-          } catch (e) {
-              alert("Failed to force logout user.");
+          } catch (e: any) {
+              alert(`Failed to force logout user. Error: ${e.message || e}`);
+              console.error(e);
           }
       }
   };

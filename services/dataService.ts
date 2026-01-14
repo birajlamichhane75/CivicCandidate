@@ -304,9 +304,28 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 export const forceLogoutUser = async (userId: string): Promise<void> => {
-  const { error } = await supabase
+  // 1. Try to set force_logout flag (Best effort)
+  // We ignore errors here because the 'force_logout' column might not exist in the DB schema.
+  await supabase
     .from('users')
     .update({ force_logout: true })
+    .eq('id', userId)
+    .then(({ error }) => {
+        if (error) {
+            console.warn("Could not set force_logout flag (column might be missing):", error.message);
+        }
+    });
+
+  // 2. Revoke Verification Status (Mandatory Requirement)
+  // This satisfies: "Require the user to verify their number to enter constituency"
+  // And it acts as a reliable logout signal for the Auth Heartbeat if force_logout column is missing.
+  const { error } = await supabase
+    .from('users')
+    .update({ 
+        verification_status: 'unverified',
+        is_verified: false,
+        constituency_id: null
+    })
     .eq('id', userId);
 
   if (error) throw error;
