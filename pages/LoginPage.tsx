@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,10 +9,23 @@ const LoginPage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, loading } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+        if (user.role === 'admin') {
+            navigate('/admin', { replace: true });
+        } else if (user.is_verified && user.constituency_id) {
+            navigate(`/constituency/${user.constituency_id}`, { replace: true });
+        } else {
+            navigate('/verify', { replace: true });
+        }
+    }
+  }, [isAuthenticated, user, loading, navigate]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +69,11 @@ const LoginPage: React.FC = () => {
       setError(t('लगइन असफल भयो।', 'Login Failed.'));
     }
   };
+
+  // Show nothing or loader while checking auth status to prevent flash of login form
+  if (loading || isAuthenticated) {
+     return null; 
+  }
 
   return (
     <div className="min-h-[calc(100vh-140px)] flex items-center justify-center bg-slate-100 px-4 py-12">

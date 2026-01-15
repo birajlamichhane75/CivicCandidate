@@ -10,12 +10,14 @@ interface AuthContextType {
   logout: () => void;
   updateUserVerification: (status: VerificationStatus, constituencyId?: string) => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   // Ref to keep track of user ID for the interval to prevent stale closure
   const userRef = useRef<User | null>(null);
 
@@ -26,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initial Load & Heartbeat
   useEffect(() => {
     const initializeAuth = async () => {
+      setLoading(true);
       const storedUser = localStorage.getItem('demo_user');
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
@@ -35,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
            // Admin user case (no numeric ID usually, or special handling)
            if (parsedUser.role === 'admin') {
                setUser(parsedUser);
+               setLoading(false);
                return; 
            }
            
@@ -48,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Check for forced logout logic (if column exists, otherwise undefined is false)
             if (data.force_logout) {
                 logout();
+                setLoading(false);
                 return;
             }
             setUser(data);
@@ -61,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(parsedUser);
         }
       }
+      setLoading(false);
     };
 
     initializeAuth();
@@ -200,7 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, loginAdmin, logout, updateUserVerification, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, loginAdmin, logout, updateUserVerification, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );

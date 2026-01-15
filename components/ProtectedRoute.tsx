@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../services/authService';
@@ -10,9 +11,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, requireVerification = false }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const location = useLocation();
   const { id } = useParams<{ id: string }>(); // Get constituency ID from URL parameters
+
+  if (loading) {
+     return (
+        <div className="flex justify-center items-center h-[50vh]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        </div>
+     );
+  }
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
