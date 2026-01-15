@@ -12,7 +12,7 @@ import { FaSearch, FaUsers, FaVoteYea, FaClipboardCheck, FaChevronLeft, FaChevro
 // Area Specific Images Mapping
 const AREA_IMAGES: Record<string, string> = {
   'bhaktapur-1': 'https://www.relaxgetaways.com/uploads/img/nagarkot-hiking-with-sunrise-1.jpeg', // Bhaktapur/Nagarkot
-  'bara-3': 'https://jankarinepal.com/wp-content/uploads/2019/10/nijgadh.jpg', // Terai/Fields
+  'bara-4': 'https://jankarinepal.com/wp-content/uploads/2019/10/nijgadh.jpg', // Terai/Fields
   'kathmandu-7': 'https://www.trektonepal.com/files/pics/View-tower-Kathmandu-Mudhkhu-Vanjhyang.jpg' // Kathmandu
 };
 
@@ -46,7 +46,7 @@ const LandingPage: React.FC = () => {
 
   const filteredConstituencies = constituencies.filter(c => {
     // Strict filter for unverified users: Only show specific 3 areas
-    const allowedIds = ['bhaktapur-1', 'bara-3', 'kathmandu-7'];
+    const allowedIds = ['bhaktapur-1', 'bara-4', 'kathmandu-7'];
     if (!allowedIds.includes(c.id)) return false;
 
     const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,3 +1,4 @@
+
 import { Constituency } from "./types";
 
 export const PROVINCES = [
@@ -16,6 +17,9 @@ export const MUNICIPALITIES: Record<string, string[]> = {
     "Changunarayan Municipality"
   ],
   "Bara": [
+    "Parwanipur Rural Municipality",
+    "Prasauni Rural Municipality",
+    "Bishrampur Rural Municipality",
     "Kalaiya Sub-Metropolitan City", 
     "Pheta Rural Municipality", 
     "Jitpur Simara Sub-Metropolitan City"
@@ -36,10 +40,13 @@ export const WARDS: Record<string, string[]> = {
   "Bhaktapur Municipality": range(1, 10), // Wards 1-10
   "Changunarayan Municipality": range(1, 9), // Wards 1-9
   
-  // Bara 3
-  "Kalaiya Sub-Metropolitan City": [...range(1, 16), ...range(18, 27)], // Wards 1-16 and 18-27
-  "Pheta Rural Municipality": range(5, 7), // Wards 5-7
-  "Jitpur Simara Sub-Metropolitan City": range(11, 18), // Wards 11-18
+  // Bara 4
+  "Parwanipur Rural Municipality": range(1, 5),
+  "Prasauni Rural Municipality": range(1, 7),
+  "Bishrampur Rural Municipality": range(1, 5),
+  "Kalaiya Sub-Metropolitan City": ["17"], // Ward 17 only
+  "Pheta Rural Municipality": range(1, 4), // Wards 1-4
+  "Jitpur Simara Sub-Metropolitan City": [...range(1, 10), ...range(19, 24)], // Wards 1-10 and 19-24
 
   // Kathmandu 7
   "Kathmandu Metropolitan City": ["16", "17", "18", "25"],
@@ -58,8 +65,8 @@ export const MOCK_CONSTITUENCIES: Constituency[] = [
     mp_image: "https://upload.wikimedia.org/wikipedia/commons/4/46/Prem_Suwal.jpg"
   },
   {
-    id: "bara-3",
-    name: "Bara 3",
+    id: "bara-4",
+    name: "Bara 4",
     province: "Madhesh Province",
     district: "Bara",
     mp_name: "Jwala Kumari Sah", 

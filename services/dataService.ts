@@ -89,14 +89,14 @@ export const getConstituencyById = async (id: string): Promise<Constituency | un
 };
 
 export const detectConstituency = async (province: string, district: string, municipality: string, ward: string): Promise<string> => {
-  // Logic for the Limited Version (Bhaktapur 1, Bara 3, Kathmandu 7)
+  // Logic for the Limited Version (Bhaktapur 1, Bara 4, Kathmandu 7)
   
   if (district === 'Bhaktapur') {
       return 'bhaktapur-1';
   }
 
   if (district === 'Bara') {
-      return 'bara-3';
+      return 'bara-4';
   }
 
   if (district === 'Kathmandu') {
