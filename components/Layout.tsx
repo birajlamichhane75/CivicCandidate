@@ -57,7 +57,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {t('गृहपृष्ठ', 'Home')}
               </Link>
               
-              {user ? (
+              {user && (
                 <>
                   {user.role === 'admin' && (
                      <Link to="/admin" className={`px-4 py-2 text-sm font-medium transition ${isActive('/admin') ? 'text-[#0094da] border-b-2 border-[#0094da]' : 'text-slate-600 hover:text-[#0094da] hover:bg-slate-50'}`}>
@@ -88,11 +88,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     )}
                   </div>
                 </>
-              ) : (
-                <Link to="/login" className="ml-4 bg-[#0094da] text-white px-6 py-2 rounded-sm text-sm font-medium hover:bg-[#007bb8] transition shadow-sm">
-                  {t('लगइन', 'Login')}
-                </Link>
               )}
+              {/* Login Button Removed */}
 
               {/* Language Toggle - Prominent in Navbar */}
               <div className="ml-4 pl-4 border-l border-slate-200 flex items-center">
@@ -110,10 +107,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex items-center md:hidden">
+            <div className="flex items-center md:hidden space-x-3">
+               {/* Mobile "My Area" Button - Highlighted & Prominent */}
+               {user?.is_verified && user?.constituency_id && (
+                  <Link 
+                    to={`/constituency/${user.constituency_id}`}
+                    className="bg-[#0094da] text-white px-3 py-1.5 rounded-sm text-xs font-bold shadow-sm flex items-center hover:bg-[#007bb8] transition border border-[#007bb8]"
+                  >
+                    <FaMapMarkerAlt className="mr-1.5 h-3 w-3" />
+                    {t('मेरो क्षेत्र', 'My Area')}
+                  </Link>
+               )}
+
                <button 
                   onClick={toggleLanguage} 
-                  className="mr-4 text-[#0094da] font-bold text-sm focus:outline-none flex items-center"
+                  className="text-[#0094da] font-bold text-sm focus:outline-none flex items-center p-1"
                 >
                   {language === 'ne' ? 'EN' : 'NE'}
                 </button>
@@ -134,7 +142,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-[#0094da] border-l-4 border-transparent hover:border-[#0094da]">
                  {t('गृहपृष्ठ', 'Home')}
                </Link>
-               {user ? (
+               {user && (
                   <>
                     {user.role === 'admin' && (
                       <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 border-l-4 border-transparent hover:border-[#0094da]">
@@ -157,11 +165,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       </button>
                     )}
                   </>
-               ) : (
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 border-l-4 border-transparent hover:border-[#0094da]">
-                    {t('लगइन', 'Login')}
-                  </Link>
                )}
+               {/* Login Link Removed */}
             </div>
           </div>
         )}
@@ -188,7 +193,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">{t('द्रुत लिंकहरू', 'Quick Links')}</h4>
             <ul className="space-y-3 text-sm">
               <li><Link to="/" className="hover:text-[#0094da] transition">{t('गृहपृष्ठ', 'Home')}</Link></li>
-              <li><Link to="/login" className="hover:text-[#0094da] transition">{t('लगइन', 'Login')}</Link></li>
               <li><Link to="/verify" className="hover:text-[#0094da] transition">{t('प्रमाणीकरण', 'Verify Identity')}</Link></li>
             </ul>
           </div>
