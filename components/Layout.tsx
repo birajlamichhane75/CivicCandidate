@@ -194,6 +194,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <ul className="space-y-3 text-sm">
               <li><Link to="/" className="hover:text-[#0094da] transition">{t('गृहपृष्ठ', 'Home')}</Link></li>
               <li><Link to="/verify" className="hover:text-[#0094da] transition">{t('प्रमाणीकरण', 'Verify Identity')}</Link></li>
+              <li><Link to="/privacy-policy" className="hover:text-[#0094da] transition">{t('गोपनीयता नीति', 'Privacy Policy')}</Link></li>
             </ul>
           </div>
           <div className="md:border-l md:border-slate-800 md:pl-8">

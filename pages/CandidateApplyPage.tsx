@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { registerCandidate, uploadCandidateProfileImage } from '../services/dataService';
 import { FaPlus, FaTrash, FaUserEdit, FaInfoCircle, FaCheckCircle, FaClock, FaCalendarAlt, FaCamera, FaHandshake } from 'react-icons/fa';
@@ -387,6 +387,8 @@ const CandidateApplyPage: React.FC = () => {
                       </div>
                       <p className="text-xs text-slate-500 pl-6">
                           (म पुष्टि गर्छु कि म यस प्लेटफर्म मार्फत यस क्षेत्रका नागरिकहरूसँग संवाद गर्नेछु।)
+                          <br/>
+                          I also agree to the <Link to="/privacy-policy" target="_blank" className="text-[#0094da] underline hover:text-[#007bb8]">Privacy Policy & Terms of Use</Link>.
                       </p>
                   </div>
               </label>

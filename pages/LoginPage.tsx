@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FaPhone, FaArrowRight, FaCheckSquare } from 'react-icons/fa';
@@ -139,7 +139,7 @@ const LoginPage: React.FC = () => {
                      म पुष्टि गर्छु कि यो मेरो वास्तविक फोन नम्बर हो।
                    </span>
                    <span className="font-english">
-                     I confirm this is my real phone number. If I fail verification when needed, the admin can remove me from the app.
+                     I confirm this is my real phone number and I agree to the <Link to="/privacy-policy" target="_blank" className="text-[#0094da] hover:underline hover:text-[#007bb8]">Privacy Policy & Terms of Use</Link>. If I fail verification when needed, the admin can remove me from the app.
                    </span>
                 </div>
              </label>

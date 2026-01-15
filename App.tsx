@@ -12,6 +12,7 @@ import PreElectionPage from './pages/PreElectionPage';
 import PostElectionPage from './pages/PostElectionPage';
 import CandidateApplyPage from './pages/CandidateApplyPage';
 import AdminDashboard from './pages/AdminDashboard';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './services/authService';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -26,6 +27,7 @@ const App: React.FC = () => {
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               
               {/* HIDDEN ADMIN ROUTE - OBFUSCATED */}
               <Route path="/sys/access-portal" element={<AdminLoginPage />} />

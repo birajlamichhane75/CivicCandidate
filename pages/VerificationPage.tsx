@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AddressSelector from '../components/AddressSelector';
 import { submitVerification, detectConstituency, uploadIdDocument } from '../services/dataService';
 import { useAuth } from '../services/authService';
@@ -283,7 +283,7 @@ const VerificationPage: React.FC = () => {
                                मैले दिएका सबै विवरण सत्य हुन् र झूटो जानकारी वा परिचयपत्र भए कानुनी कारवाही हुन सक्छ भन्ने बुझ्दछु।
                             </p>
                             <p className="text-xs text-slate-500 font-english mt-1">
-                               I confirm that all information provided is true. Providing fake information or ID may result in legal action.
+                               I confirm that all information provided is true. I agree to the <Link to="/privacy-policy" target="_blank" className="text-[#0094da] underline">Privacy Policy</Link>. Providing fake information or ID may result in legal action.
                             </p>
                          </div>
                      </div>
