@@ -199,8 +199,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
           <div className="md:border-l md:border-slate-800 md:pl-8">
             <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">{t('सम्पर्क', 'Contact')}</h4>
-            <p className="text-sm">{t('काठमाडौँ, नेपाल', 'Kathmandu, Nepal')}</p>
-            <p className="text-sm mt-2 font-english">support@civiccandidate.org</p>
+            <p className="text-sm mt-2 font-english">civiccandidate@gmail.com</p>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-8 border-t border-slate-800 text-xs text-center font-english text-slate-500">
