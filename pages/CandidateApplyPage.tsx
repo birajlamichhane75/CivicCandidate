@@ -33,8 +33,11 @@ const CandidateApplyPage: React.FC = () => {
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [commitmentConfirmed, setCommitmentConfirmed] = useState(false);
 
-  // Proposals state now array of objects
+  // Proposals state now initialized with 5 empty items to encourage filling them out
   const [proposals, setProposals] = useState<Proposal[]>([
+    { title: '', description: '' },
+    { title: '', description: '' },
+    { title: '', description: '' },
     { title: '', description: '' },
     { title: '', description: '' }
   ]); 
@@ -61,7 +64,7 @@ const CandidateApplyPage: React.FC = () => {
   };
 
   const addProposal = () => {
-    if (proposals.length < 5) {
+    if (proposals.length < 10) {
       setProposals([...proposals, { title: '', description: '' }]);
     }
   };
@@ -98,8 +101,8 @@ const CandidateApplyPage: React.FC = () => {
     }
 
     const validProposals = proposals.filter(p => p.title.trim() !== '' && p.description.trim() !== '');
-    if (validProposals.length === 0) {
-      alert("At least one proposal is required.");
+    if (validProposals.length < 5) {
+      alert("Minimum 5 proposals are required to support your candidacy.");
       return;
     }
 
@@ -310,10 +313,13 @@ const CandidateApplyPage: React.FC = () => {
 
           {/* Section 3: Proposals */}
           <div className="bg-slate-50 p-6 border border-slate-200 rounded-sm">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-              <span className="bg-[#0094da] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">3</span>
-              एजेन्डा / प्रस्तावहरू (Proposals)
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                    <span className="bg-[#0094da] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3">3</span>
+                    एजेन्डा / प्रस्तावहरू (Proposals)
+                </h3>
+                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-sm border border-amber-200 font-bold">Minimum 5 Required</span>
+            </div>
             
             <div className="space-y-4">
                 {proposals.map((prop, idx) => (
@@ -350,7 +356,7 @@ const CandidateApplyPage: React.FC = () => {
                 ))}
             </div>
 
-            {proposals.length < 5 && (
+            {proposals.length < 10 && (
                 <button 
                     type="button" 
                     onClick={addProposal}
