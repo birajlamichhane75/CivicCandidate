@@ -5,7 +5,7 @@ import { User, VerificationStatus } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  login: (phone: string, otp: string) => Promise<boolean>;
+  login: (phone: string) => Promise<boolean>;
   loginAdmin: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateUserVerification: (status: VerificationStatus, constituencyId?: string) => void;
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
           
           if (data) {
-            // Check for forced logout logic
+            // Check for forced logout logic (if column exists, otherwise undefined is false)
             if (data.force_logout) {
                 logout();
                 return;
@@ -96,66 +96,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(intervalId);
   }, []);
 
-  // 1. CITIZEN LOGIN (Phone + OTP)
+  // 1. CITIZEN LOGIN (Phone Only - No OTP)
   // Security: MUST reject if the user role is 'admin'
-  const login = async (identifier: string, secret: string): Promise<boolean> => {
+  const login = async (identifier: string): Promise<boolean> => {
     // Admin checks in this flow are REMOVED. 
     // Admins must use loginAdmin via the hidden route.
 
-    // Citizen Login (Simulating OTP)
-    if (secret === '123456') {
-      try {
-        // Check if user exists
-        let { data: existingUser, error } = await supabase
+    try {
+      // Check if user exists
+      let { data: existingUser, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('phone_number', identifier)
+        .single();
+
+      if (existingUser) {
+          // SECURITY CHECK: Block Admin from using this flow
+          if (existingUser.role === 'admin') {
+              console.warn("Security Alert: Admin attempted login via Public flow.");
+              alert("Access Denied: Administrative accounts cannot use this login method.");
+              return false;
+          }
+
+          // Reset force_logout flag on successful login (Best Effort)
+          // COMMENTED OUT to prevent errors if column is missing
+          /*
+          supabase
+              .from('users')
+              .update({ force_logout: false })
+              .eq('id', existingUser.id)
+              .then(({error}) => {
+                  if (error) console.warn("Could not reset force_logout:", error.message);
+              });
+          */
+          if (existingUser.force_logout) {
+             existingUser.force_logout = false;
+          }
+      } else {
+        // Register new user (Citizens only)
+        const { data: newUser, error: createError } = await supabase
           .from('users')
-          .select('*')
-          .eq('phone_number', identifier)
+          .insert([{ 
+              phone_number: identifier,
+              role: 'citizen',
+              verification_status: 'unverified'
+              // force_logout: false // REMOVED: Column does not exist in schema
+          }])
+          .select()
           .single();
-
-        if (existingUser) {
-            // SECURITY CHECK: Block Admin from using OTP flow
-            if (existingUser.role === 'admin') {
-                console.warn("Security Alert: Admin attempted login via OTP flow.");
-                alert("Access Denied: Administrative accounts cannot use this login method.");
-                return false;
-            }
-
-            // Reset force_logout flag on successful login (Best Effort)
-            supabase
-                .from('users')
-                .update({ force_logout: false })
-                .eq('id', existingUser.id)
-                .then(({error}) => {
-                    if (error) console.warn("Could not reset force_logout:", error.message);
-                });
-            existingUser.force_logout = false;
-        } else {
-          // Register new user (Citizens only)
-          const { data: newUser, error: createError } = await supabase
-            .from('users')
-            .insert([{ 
-                phone_number: identifier,
-                role: 'citizen',
-                verification_status: 'unverified',
-                force_logout: false
-            }])
-            .select()
-            .single();
-          
-          if (createError) throw createError;
-          existingUser = newUser;
-        }
-
-        setUser(existingUser);
-        localStorage.setItem('demo_user', JSON.stringify(existingUser));
-        return true;
-      } catch (e) {
-        console.error("Login failed", e);
-        return false;
+        
+        if (createError) throw createError;
+        existingUser = newUser;
       }
+
+      setUser(existingUser);
+      localStorage.setItem('demo_user', JSON.stringify(existingUser));
+      return true;
+    } catch (e) {
+      console.error("Login failed", e);
+      return false;
     }
-    
-    return false;
   };
 
   // 2. ADMIN LOGIN (Email + Password)

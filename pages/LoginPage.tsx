@@ -1,42 +1,59 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FaPhone, FaLock, FaArrowRight, FaInfoCircle } from 'react-icons/fa';
+import { FaPhone, FaArrowRight, FaCheckSquare } from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (phoneNumber.length < 10 && phoneNumber !== 'admin') {
-      setError(t('कृपया मान्य १० अंकको मोबाइल नम्बर प्रविष्ट गर्नुहोस्', 'Please enter a valid 10-digit mobile number'));
+
+    // 1. Strict Validation: 10 digits only
+    const phoneRegex = /^\d{10}$/;
+    
+    // Check for admin keyword bypass or valid phone number
+    const isValidPhone = phoneRegex.test(phoneNumber);
+    const isAdminBypass = phoneNumber === 'admin';
+
+    if (!isValidPhone && !isAdminBypass) {
+      setError(t(
+        'कृपया मान्य १० अंकको मोबाइल नम्बर प्रविष्ट गर्नुहोस् (अक्षरहरू वा विशेष वर्णहरू बिना)', 
+        'Please enter a valid 10-digit mobile number (digits only, no special characters)'
+      ));
       return;
     }
-    setStep('otp');
-  };
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    const success = await login(phoneNumber, otp);
+    // 2. Checkbox Validation (Not required for admin bypass)
+    if (!isAdminBypass && !isConfirmed) {
+      setError(t(
+        'कृपया जारी राख्नको लागि बक्समा टिक लगाउनुहोस्', 
+        'Please check the box to confirm your identity before continuing'
+      ));
+      return;
+    }
+
+    // 3. Login Flow
+    const success = await login(phoneNumber);
     if (success) {
-      const from = (location.state as any)?.from?.pathname || '/';
+      const from = (location.state as any)?.from?.pathname || '/verify'; // Default to /verify if no redirect state
       if (phoneNumber === 'admin') {
           navigate('/admin');
       } else {
-          navigate(from);
+          // If the user came from a specific page, go there, otherwise go to verify
+          navigate(from === '/' ? '/verify' : from);
       }
     } else {
-      setError(t('अमान्य विवरण।', 'Invalid Credentials.'));
+      setError(t('लगइन असफल भयो।', 'Login Failed.'));
     }
   };
 
@@ -45,13 +62,10 @@ const LoginPage: React.FC = () => {
       <div className="max-w-md w-full bg-white p-8 border border-slate-200 shadow-sm rounded-sm">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-slate-900">
-            {step === 'phone' ? t('लगइन', 'Login') : t('ओटीपी प्रविष्ट गर्नुहोस्', 'Enter OTP')}
+            {t('लगइन', 'Login')}
           </h2>
           <p className="mt-2 text-sm text-slate-500 font-english">
-            {step === 'phone' 
-              ? t('नागरिक उम्मेदवार पोर्टलमा सुरक्षित पहुँच।', 'Secure access to Civic Candidate portal.') 
-              : `${t('कोड पठाइयो', 'Code sent to')} ${phoneNumber}`
-            }
+            {t('नागरिक उम्मेदवार पोर्टलमा सुरक्षित पहुँच।', 'Secure access to Civic Candidate portal.')}
           </p>
         </div>
         
@@ -61,77 +75,69 @@ const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {step === 'phone' ? (
-          <form className="space-y-6" onSubmit={handlePhoneSubmit}>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-1">{t('मोबाइल नम्बर', 'Mobile Number')}</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaPhone className="h-4 w-4 text-slate-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="text"
-                  required
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
-                  placeholder="98XXXXXXXX"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                />
+        <form className="space-y-6" onSubmit={handleLoginSubmit}>
+          <div>
+            <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-1">{t('मोबाइल नम्बर', 'Mobile Number')}</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaPhone className="h-4 w-4 text-slate-400" />
               </div>
+              <input
+                id="phone"
+                name="phone"
+                type="text"
+                required
+                maxLength={10}
+                className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
+                placeholder="98XXXXXXXX"
+                value={phoneNumber}
+                onChange={(e) => {
+                  // Only allow digits to be typed
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setPhoneNumber(val);
+                  }
+                }}
+              />
             </div>
-            <div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition"
-              >
-                {t('ओटीपी पठाउनुहोस्', 'Send OTP')}
-                <FaArrowRight className="ml-2 h-4 w-4" />
-              </button>
-            </div>
-            
-          </form>
-        ) : (
-           <form className="space-y-6" onSubmit={handleOtpSubmit}>
-            <div>
-              <label htmlFor="otp" className="block text-sm font-semibold text-slate-700 mb-1">{t('ओटीपी कोड', 'OTP Code')}</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-4 w-4 text-slate-400" />
+            <p className="text-xs text-slate-400 mt-1 font-english text-right">
+               {phoneNumber.length}/10
+            </p>
+          </div>
+
+          {/* Mandatory Confirmation Checkbox */}
+          <div className="bg-slate-50 p-4 border border-slate-200 rounded-sm">
+             <label className="flex items-start space-x-3 cursor-pointer group">
+                <div className="flex items-center h-6">
+                  <input
+                    type="checkbox"
+                    checked={isConfirmed}
+                    onChange={(e) => setIsConfirmed(e.target.checked)}
+                    className="h-5 w-5 text-[#0094da] border-slate-300 rounded focus:ring-[#0094da] cursor-pointer"
+                  />
                 </div>
-                <input
-                  id="otp"
-                  name="otp"
-                  type="password"
-                  required
-                  className="block w-full pl-10 sm:text-sm border-slate-300 rounded-sm py-3 tracking-widest text-center text-lg focus:ring-1 focus:ring-[#0094da] focus:border-[#0094da] font-english"
-                  placeholder="_ _ _ _ _ _"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-              </div>
-              <p className="mt-2 text-xs text-center text-slate-400 font-english">
-                  Demo: <code>123456</code>
-              </p>
-            </div>
-            <div className="flex space-x-3">
-               <button
-                type="button"
-                onClick={() => setStep('phone')}
-                className="w-1/3 py-3 px-4 border border-slate-300 text-sm font-medium rounded-sm text-slate-700 bg-white hover:bg-slate-50 transition"
-              >
-                {t('फिर्ता', 'Back')}
-              </button>
-              <button
-                type="submit"
-                className="w-2/3 flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition"
-              >
-                 {t('प्रवेश गर्नुहोस्', 'Login')}
-              </button>
-            </div>
-          </form>
-        )}
+                <div className="text-xs text-slate-700 leading-relaxed">
+                   <span className="font-bold text-slate-900 block mb-1">
+                     म पुष्टि गर्छु कि यो मेरो वास्तविक फोन नम्बर हो।
+                   </span>
+                   <span className="font-english">
+                     I confirm this is my real phone number. If I fail verification when needed, the admin can remove me from the app.
+                   </span>
+                </div>
+             </label>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={phoneNumber.length !== 10 && phoneNumber !== 'admin'}
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#0094da] hover:bg-[#007bb8] focus:outline-none transition disabled:bg-slate-300 disabled:cursor-not-allowed"
+            >
+              {t('प्रवेश गर्नुहोस्', 'Login')}
+              <FaArrowRight className="ml-2 h-4 w-4" />
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
