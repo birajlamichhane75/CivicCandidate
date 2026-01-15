@@ -19,6 +19,18 @@ const VerificationPage: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [decisionDates, setDecisionDates] = useState<{ ad: string, bs: string, time: string } | null>(null);
 
+  // Redirect verified or pending users away from this page
+  // We skip redirect if isSuccess is true, so the user can see the confirmation message immediately after submission
+  useEffect(() => {
+    if (user && !isSuccess) {
+      if (user.verification_status === 'approved' && user.constituency_id) {
+        navigate(`/constituency/${user.constituency_id}`, { replace: true });
+      } else if (user.verification_status === 'pending') {
+        navigate('/verification-status', { replace: true });
+      }
+    }
+  }, [user, navigate, isSuccess]);
+
   // Cleanup preview URL on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
@@ -100,6 +112,7 @@ const VerificationPage: React.FC = () => {
         });
 
         // 4. Update Local State
+        // Note: This update triggers the useEffect, but since we set setIsSuccess(true) in the same batch, the effect logic !isSuccess prevents redirect
         updateUserVerification('pending', constituencyId);
         
         // 5. Show Success View
