@@ -35,6 +35,32 @@ export const uploadIdDocument = async (file: File, userId: string): Promise<stri
   return data.signedUrl;
 };
 
+export const uploadCandidateProfileImage = async (file: File, userId: string): Promise<string> => {
+  // 1. Construct path
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}_profile_${Date.now()}.${fileExt}`;
+  
+  // 2. Upload to 'candidate-profiles' bucket
+  const { error: uploadError } = await supabase.storage
+    .from('candidate-profiles')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: true
+    });
+
+  if (uploadError) {
+    console.error('Profile Upload Error:', uploadError);
+    throw new Error(`Failed to upload profile image: ${uploadError.message}`);
+  }
+
+  // 3. Get Public URL
+  const { data } = supabase.storage
+    .from('candidate-profiles')
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+};
+
 // --- Constituencies ---
 export const getConstituencies = async (): Promise<Constituency[]> => {
   const { data, error } = await supabase

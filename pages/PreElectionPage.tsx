@@ -218,11 +218,22 @@ const PreElectionPage: React.FC = () => {
 
                         <div className="p-6">
                             <div className="flex flex-col md:flex-row gap-6">
-                                {/* Vote Count Badge */}
+                                {/* Vote Count Badge & Profile Image */}
                                 <div className="flex-shrink-0 flex flex-col items-center min-w-[100px] md:border-r border-slate-100 md:pr-6">
-                                    <div className="h-20 w-20 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 mb-3 relative overflow-hidden">
-                                        <FaUserTie className="h-10 w-10" />
+                                    
+                                    {/* Profile Image Display */}
+                                    <div className="h-24 w-24 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 mb-3 relative overflow-hidden shadow-sm">
+                                        {candidate.profile_image_url ? (
+                                            <img 
+                                                src={candidate.profile_image_url} 
+                                                alt={candidate.name} 
+                                                className="w-full h-full object-cover" 
+                                            />
+                                        ) : (
+                                            <FaUserTie className="h-10 w-10" />
+                                        )}
                                     </div>
+
                                     <div className="text-center w-full">
                                         <div className="text-3xl font-bold text-slate-900 font-english">{candidate.vote_count}</div>
                                         <div className="text-[10px] text-slate-400 uppercase tracking-wider font-english">Votes</div>

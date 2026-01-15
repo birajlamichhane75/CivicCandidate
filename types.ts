@@ -46,6 +46,8 @@ export interface Candidate {
   status: CandidateStatus;
   election_commission_filed: boolean;
   party_affiliation: string;
+  profile_image_url?: string;
+  confirmed_commitment?: boolean;
 }
 
 export interface Issue {
